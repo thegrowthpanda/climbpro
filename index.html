@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CLIMB PRO — Business Planner</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ClimbPro">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#7c6bff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c27;--border:#2a2a3a;
+  --text:#f0f0f8;--muted:#6b6b88;
+  --accent:#7c6bff;--accent2:#ff6b9d;--accent3:#6bffb8;--gold:#ffd166;--warn:#ff8c42;
+  --r:16px;--r-sm:10px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:90px;font-size:15px;-webkit-tap-highlight-color:transparent}
+header{background:linear-gradient(135deg,#7c6bff22,#ff6b9d11);border-bottom:1px solid var(--border);padding:16px 18px;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);display:flex;justify-content:space-between;align-items:center}
+.brand{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem}
+.brand span{color:var(--accent)}
+.date-badge{background:var(--surface2);border:1px solid var(--border);padding:5px 12px;border-radius:40px;font-size:0.74rem;color:var(--muted)}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:200;padding:8px 0 max(8px,env(safe-area-inset-bottom))}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;cursor:pointer;border:none;background:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.68rem;transition:color 0.2s}
+.nav-item.active{color:var(--accent)}
+.nav-item svg{width:21px;height:21px}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);display:none}
+.nav-item.active .nav-dot{display:block}
+.view{display:none;padding:16px;animation:fadeUp 0.25s ease}
+.view.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:3px;margin-top:12px}
+.section-sub{color:var(--muted);font-size:0.78rem;margin-bottom:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.card-sm{padding:13px 15px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:13px 10px;text-align:center}
+.stat-num{font-family:'Syne',sans-serif;font-size:1.65rem;font-weight:800;line-height:1}
+.stat-lbl{font-size:0.68rem;color:var(--muted);margin-top:3px}
+.purple{color:var(--accent)}.pink{color:var(--accent2)}.green{color:var(--accent3)}
+.score-banner{background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:var(--r);padding:16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.score-big{font-family:'Syne',sans-serif;font-weight:800;font-size:2.2rem;line-height:1}
+.score-lbl{font-size:0.75rem;opacity:0.85;margin-top:2px}
+.score-msg{font-size:0.82rem;text-align:right;max-width:130px}
+.ring-box{display:flex;align-items:center;gap:16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.ring-wrap{position:relative;width:76px;height:76px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;line-height:1.1}
+.ring-label small{font-size:0.58rem;color:var(--muted);font-family:'DM Sans',sans-serif}
+.ring-info h4{font-family:'Syne',sans-serif;font-size:0.92rem;margin-bottom:3px}
+.ring-info p{color:var(--muted);font-size:0.76rem}
+.quick-row{display:flex;gap:10px;margin-bottom:13px}
+.quick-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s}
+.quick-row input:focus{border-color:var(--accent)}
+.icon-btn{background:var(--accent);border:none;border-radius:var(--r-sm);width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:#fff;transition:0.2s}
+.icon-btn:active{transform:scale(0.93)}
+.task-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+.task-item:last-child{border-bottom:none;padding-bottom:0}
+.prio-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.prio-high{background:#ff4757}.prio-medium{background:var(--gold)}.prio-low{background:var(--accent3)}
+.task-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--border);background:none;cursor:pointer;flex-shrink:0;transition:0.2s;display:flex;align-items:center;justify-content:center}
+.task-check.done{background:var(--accent3);border-color:var(--accent3)}
+.task-body{flex:1;min-width:0}
+.task-name{font-size:0.87rem;font-weight:500;word-break:break-word}
+.task-name.done{text-decoration:line-through;color:var(--muted)}
+.task-meta{font-size:0.7rem;color:var(--muted);margin-top:2px}
+.tag{display:inline-block;padding:2px 7px;border-radius:20px;font-size:0.64rem;font-weight:600;margin-right:3px}
+.tag-work{background:#7c6bff22;color:var(--accent)}.tag-personal{background:#ff6b9d22;color:var(--accent2)}
+.tag-health{background:#6bffb822;color:var(--accent3)}.tag-study{background:#ffd16622;color:var(--gold)}.tag-other{background:#ff8c4222;color:var(--warn)}
+.task-actions{display:flex;gap:2px;flex-shrink:0}
+.act-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;transition:0.2s;line-height:1;display:flex;align-items:center;justify-content:center}
+.filter-row{display:flex;gap:7px;overflow-x:auto;padding-bottom:10px;margin-bottom:10px;-webkit-overflow-scrolling:touch}
+.filter-row::-webkit-scrollbar{display:none}
+.chip{padding:7px 13px;border-radius:40px;background:var(--surface2);border:1.5px solid var(--border);color:var(--muted);cursor:pointer;font-size:0.78rem;white-space:nowrap;transition:0.15s;font-family:'DM Sans',sans-serif}
+.chip.active{background:var(--accent)22;border-color:var(--accent);color:var(--accent)}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:0.74rem;color:var(--muted);margin-bottom:5px;font-weight:500}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group select option{background:var(--surface2)}
+.form-group textarea{height:88px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{display:block;width:100%;padding:12px;border:none;border-radius:var(--r-sm);font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:0.2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:active{transform:scale(0.98)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-sm{padding:8px 18px;font-size:0.8rem;width:auto;display:inline-block;margin-bottom:14px}
+.habit-row{background:var(--surface2);border-radius:var(--r);padding:12px 13px;margin-bottom:10px;display:flex;align-items:center;gap:11px}
+.habit-emoji{font-size:1.3rem;width:32px;text-align:center}
+.habit-info{flex:1;min-width:0}
+.habit-info strong{display:block;font-size:0.86rem;font-weight:600}
+.habit-info span{font-size:0.7rem;color:var(--muted)}
+.week-dots{display:flex;gap:4px;margin-top:6px}
+.wdot{width:24px;height:24px;border-radius:7px;border:1.5px solid var(--border);background:none;cursor:pointer;font-size:0.6rem;color:var(--muted);font-weight:700;display:flex;align-items:center;justify-content:center;transition:0.15s}
+.wdot.checked{background:var(--accent3);border-color:var(--accent3);color:#000;font-size:0.75rem}
+.habit-right{text-align:center;flex-shrink:0}
+.streak-num{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem}
+.habit-right small{display:block;font-size:0.6rem;color:var(--muted)}
+.goal-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:15px;margin-bottom:12px;position:relative;overflow:hidden}
+.goal-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--accent)}
+.goal-card.pink::before{background:var(--accent2)}.goal-card.green::before{background:var(--accent3)}.goal-card.gold::before{background:var(--gold)}
+.goal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem}
+.goal-sub{font-size:0.7rem;color:var(--muted);margin:3px 0 8px}
+.prog-bar{height:5px;background:var(--border);border-radius:10px;overflow:hidden}
+.prog-fill{height:100%;border-radius:10px;background:var(--accent);transition:width 0.5s ease}
+.goal-footer{display:flex;align-items:center;margin-top:7px;gap:8px}
+.goal-footer input[type=range]{flex:1;accent-color:var(--accent);height:22px}
+.goal-pct{font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;width:34px;text-align:right;flex-shrink:0}
+.mood-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
+.mood-btn{padding:7px 12px;border-radius:40px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);cursor:pointer;font-size:0.82rem;transition:0.15s;font-family:'DM Sans',sans-serif}
+.mood-btn.active{border-color:var(--accent);background:var(--accent)22}
+.note-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:10px}
+.note-card h4{font-size:0.86rem;font-weight:600;margin-bottom:3px}
+.note-card p{font-size:0.76rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.note-card small{font-size:0.66rem;color:var(--border);display:block;margin-top:6px}
+.timer-modes{display:flex;gap:7px;justify-content:center;margin-bottom:16px}
+.mode-btn{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:0.78rem;font-family:'DM Sans',sans-serif;transition:0.15s}
+.mode-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.timer-wrap{position:relative;width:160px;height:160px;margin:0 auto 16px}
+.timer-wrap svg{transform:rotate(-90deg)}
+.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:2.3rem}
+.timer-btns{display:flex;gap:11px;justify-content:center}
+.ctrl-btn{padding:11px 24px;border-radius:var(--r-sm);border:none;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;font-size:0.86rem;transition:0.2s}
+.ctrl-start{background:var(--accent);color:#fff}.ctrl-reset{background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+.ctrl-btn:active{transform:scale(0.96)}
+.pomo-dots{display:flex;gap:6px;justify-content:center;margin-top:13px}
+.pomo-dot{width:11px;height:11px;border-radius:50%;background:var(--border)}
+.pomo-dot.lit{background:var(--accent2)}
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:300;display:flex;align-items:flex-end;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity 0.2s}
+.backdrop.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-top:1px solid var(--border);border-radius:22px 22px 0 0;width:100%;padding:20px 16px;padding-bottom:max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform 0.3s ease;max-height:92vh;overflow-y:auto}
+.backdrop.open .modal{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 16px}
+.modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.12rem;margin-bottom:16px}
+.toast{position:fixed;bottom:95px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--surface);border:1px solid var(--accent);padding:8px 16px;border-radius:40px;font-size:0.8rem;font-weight:600;z-index:500;opacity:0;transition:0.3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{text-align:center;padding:32px 16px;color:var(--muted)}
+.empty .emoji{font-size:2.4rem;margin-bottom:9px}
+.empty p{font-size:0.8rem}
+#installBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:400;background:linear-gradient(135deg,var(--accent),var(--accent2));padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top));align-items:center;gap:10px}
+#iosHint{display:none;position:fixed;bottom:95px;left:12px;right:12px;z-index:400;background:var(--surface);border:1px solid var(--accent);border-radius:16px;padding:14px;flex-direction:column;gap:8px;box-shadow:0 8px 28px rgba(0,0,0,0.5)}
+#offlineBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:399;background:var(--warn);padding:7px;text-align:center;font-size:0.76rem;font-weight:600;color:#fff}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">CLIMB<span>PRO</span></div>
+  <div class="date-badge" id="dateLabel"></div>
+</header>
+
+<!-- DASHBOARD -->
+<div class="view active" id="view-dashboard">
+  <div class="section-title">Good day 👋</div>
+  <div class="section-sub">Here's your overview</div>
+  <div class="score-banner">
+    <div><div class="score-big" id="scoreNum">0</div><div class="score-lbl">Productivity Score</div></div>
+    <div class="score-msg" id="scoreMsg">Let's get started!</div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num purple" id="stat-tasks">0</div><div class="stat-lbl">Today's Tasks</div></div>
+    <div class="stat-card"><div class="stat-num green" id="stat-done">0</div><div class="stat-lbl">Completed</div></div>
+    <div class="stat-card"><div class="stat-num pink" id="stat-streak">0🔥</div><div class="stat-lbl">Day Streak</div></div>
+  </div>
+  <div class="ring-box">
+    <div class="ring-wrap">
+      <svg width="76" height="76" viewBox="0 0 76 76">
+        <circle cx="38" cy="38" r="32" fill="none" stroke="#2a2a3a" stroke-width="8"/>
+        <circle id="ringCircle" cx="38" cy="38" r="32" fill="none" stroke="#7c6bff" stroke-width="8" stroke-dasharray="201.1" stroke-dashoffset="201.1" stroke-linecap="round" style="transition:stroke-dashoffset 0.7s ease"/>
+      </svg>
+      <div class="ring-label"><span id="ringPct">0%</span><small>done</small></div>
+    </div>
+    <div class="ring-info"><h4>Today's Progress</h4><p id="ringText">No tasks yet!</p></div>
+  </div>
+  <div class="card card-sm">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.86rem;margin-bottom:10px">⚡ Quick Task</div>
+    <div class="quick-row">
+      <input type="text" id="quickInput" placeholder="Add a quick task…" maxlength="80">
+      <button class="icon-btn" onclick="quickAdd()">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div id="dashTaskList"><div class="empty"><div class="emoji">📋</div><p>No tasks today!</p></div></div>
+  </div>
+</div>
+
+<!-- TASKS -->
+<div class="view" id="view-tasks">
+  <div class="section-title">Tasks</div>
+  <div class="section-sub">Plan and track everything</div>
+  <div class="filter-row">
+    <button class="chip active" onclick="setFilter('all',this)">All</button>
+    <button class="chip" onclick="setFilter('today',this)">Today</button>
+    <button class="chip" onclick="setFilter('work',this)">Work</button>
+    <button class="chip" onclick="setFilter('personal',this)">Personal</button>
+    <button class="chip" onclick="setFilter('health',this)">Health</button>
+    <button class="chip" onclick="setFilter('study',this)">Study</button>
+  </div>
+  <button class="btn btn-primary btn-sm" onclick="openTaskModal(null)">+ New Task</button>
+  <div id="taskListFull"><div class="empty"><div class="emoji">📭</div><p>No tasks yet!</p></div></div>
+</div>
+
+<!-- HABITS -->
+<div class="view" id="view-habits">
+  <div class="section-title">Habit Tracker</div>
+  <div class="section-sub">Build consistency daily</div>
+  <button class="btn btn-primary btn-sm" onclick="openModal('habitModal')">+ New Habit</button>
+  <div id="habitList"><div class="empty"><div class="emoji">🌱</div><p>Add your first habit!</p></div></div>
+</div>
+
+<!-- GOALS -->
+<div class="view" id="view-goals">
+  <div class="section-title">Goals & Projects</div>
+  <div class="section-sub">Track your big picture</div>
+  <button class="btn btn-primary btn-sm" onclick="openGoalModal(null)">+ New Goal</button>
+  <div id="goalList"><div class="empty"><div class="emoji">🎯</div><p>Set your first goal!</p></div></div>
+</div>
+
+<!-- FOCUS -->
+<div class="view" id="view-focus">
+  <div class="section-title">Focus Mode</div>
+  <div class="section-sub">Pomodoro timer for deep work</div>
+  <div class="card" style="text-align:center">
+    <div class="timer-modes">
+      <button class="mode-btn active" onclick="setMode('work',this)">Work 25m</button>
+      <button class="mode-btn" onclick="setMode('short',this)">Break 5m</button>
+      <button class="mode-btn" onclick="setMode('long',this)">Long 15m</button>
+    </div>
+    <div style="font-size:0.73rem;color:var(--muted);margin-bottom:5px">Focusing on:</div>
+    <div id="focusTask" onclick="pickFocusTask()" style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent);font-size:0.9rem;cursor:pointer;margin-bottom:14px;min-height:22px">— tap to choose —</div>
+    <div class="timer-wrap">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r="68" fill="none" stroke="#2a2a3a" stroke-width="10"/>
+        <circle id="timerRing" cx="80" cy="80" r="68" fill="none" stroke="#7c6bff" stroke-width="10" stroke-dasharray="427.2" stroke-dashoffset="0" stroke-linecap="round" style="transition:stroke-dashoffset 1s linear"/>
+      </svg>
+      <div class="timer-num" id="timerNum">25:00</div>
+    </div>
+    <div class="timer-btns">
+      <button class="ctrl-btn ctrl-start" id="timerBtn" onclick="toggleTimer()">Start</button>
+      <button class="ctrl-btn ctrl-reset" onclick="resetTimer()">Reset</button>
+    </div>
+    <div class="pomo-dots" id="pomoDots"></div>
+  </div>
+  <div class="card card-sm">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.86rem;margin-bottom:10px">📊 Today's Session</div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num purple" id="pomoCount">0</div><div class="stat-lbl">Pomodoros</div></div>
+      <div class="stat-card"><div class="stat-num green" id="focusMin">0m</div><div class="stat-lbl">Focus Time</div></div>
+      <div class="stat-card"><div class="stat-num pink" id="breakCount">0</div><div class="stat-lbl">Breaks</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- JOURNAL -->
+<div class="view" id="view-journal">
+  <div class="section-title">Journal</div>
+  <div class="section-sub">Reflect and set intentions</div>
+  <div class="card card-sm">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.86rem;margin-bottom:10px">Today's Mood</div>
+    <div class="mood-row">
+      <button class="mood-btn" onclick="pickMood('😄',this)">😄 Great</button>
+      <button class="mood-btn" onclick="pickMood('🙂',this)">🙂 Good</button>
+      <button class="mood-btn" onclick="pickMood('😐',this)">😐 Okay</button>
+      <button class="mood-btn" onclick="pickMood('😞',this)">😞 Low</button>
+      <button class="mood-btn" onclick="pickMood('😤',this)">😤 Stressed</button>
+    </div>
+  </div>
+  <div class="card card-sm">
+    <div class="form-group"><label>Title</label><input type="text" id="jTitle" placeholder="What's on your mind?"></div>
+    <div class="form-group"><label>Write your thoughts…</label><textarea id="jText" style="height:120px" placeholder="Reflect, plan, brainstorm…"></textarea></div>
+    <button class="btn btn-primary" onclick="saveJournal()">Save Entry</button>
+  </div>
+  <div id="journalList" style="margin-top:4px"></div>
+</div>
+
+<!-- SETTINGS / BACKUP -->
+<div class="view" id="view-settings">
+  <div class="section-title">Settings & Backup</div>
+  <div class="section-sub">Protect and manage your data</div>
+
+  <!-- GOOGLE DRIVE SECTION -->
+  <div class="card card-sm">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" width="22" height="22" onerror="this.style.display='none'">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem">Google Drive Backup</div>
+    </div>
+    <div style="font-size:0.74rem;color:var(--muted);margin-bottom:14px">Save your data to Google Drive. Restore anytime on any device.</div>
+
+    <!-- NOT connected state -->
+    <div id="driveNotConnected">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:12px;font-size:0.78rem;color:var(--muted);line-height:1.6">
+        <strong style="color:var(--text);display:block;margin-bottom:4px">📋 Setup (one time only):</strong>
+        1. Tap "Connect Google Drive" below<br>
+        2. Sign into your Google account<br>
+        3. Allow access to Google Drive<br>
+        4. Done! Tap "Backup Now" anytime to save
+      </div>
+      <button onclick="connectGoogleDrive()" style="width:100%;padding:13px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#4285f4,#34a853);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm-1 17H9V8h2v9zm4 0h-2V8h2v9z"/></svg>
+        Connect Google Drive
+      </button>
+    </div>
+
+    <!-- Connected state -->
+    <div id="driveConnected" style="display:none">
+      <div style="background:#6bffb811;border:1px solid var(--accent3);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:1.1rem">✅</span>
+        <div>
+          <div style="font-size:0.82rem;color:var(--accent3);font-weight:600">Connected to Google Drive</div>
+          <div style="font-size:0.72rem;color:var(--muted)" id="driveEmail"></div>
+        </div>
+        <button onclick="disconnectDrive()" style="margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.72rem">Disconnect</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button onclick="backupToDrive()" id="driveBackupBtn" style="flex:1;padding:13px 8px;border-radius:var(--r-sm);border:none;background:linear-gradient(135deg,#4285f4,#34a853);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer">
+          ☁️ Backup Now
+        </button>
+        <button onclick="restoreFromDrive()" style="flex:1;padding:13px 8px;border-radius:var(--r-sm);border:1.5px solid var(--gold);background:var(--surface2);color:var(--gold);font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer">
+          🔄 Restore
+        </button>
+      </div>
+      <div style="font-size:0.72rem;color:var(--muted);text-align:center" id="driveLastSync">Last backup: Never</div>
+    </div>
+  </div>
+
+  <!-- CSV DOWNLOAD -->
+  <div class="card card-sm">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;margin-bottom:4px">📊 Download as CSV</div>
+    <div style="font-size:0.74rem;color:var(--muted);margin-bottom:12px">Open in Excel, Google Sheets, or any spreadsheet app</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button onclick="downloadCSV('tasks')" style="padding:12px 8px;border-radius:var(--r-sm);border:1.5px solid var(--accent);background:var(--surface2);color:var(--accent);font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer">
+        📋 Tasks CSV
+      </button>
+      <button onclick="downloadCSV('habits')" style="padding:12px 8px;border-radius:var(--r-sm);border:1.5px solid var(--accent2);background:var(--surface2);color:var(--accent2);font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer">
+        🔥 Habits CSV
+      </button>
+      <button onclick="downloadCSV('goals')" style="padding:12px 8px;border-radius:var(--r-sm);border:1.5px solid var(--accent3);background:var(--surface2);color:var(--accent3);font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer">
+        🎯 Goals CSV
+      </button>
+      <button onclick="downloadCSV('journal')" style="padding:12px 8px;border-radius:var(--r-sm);border:1.5px solid var(--gold);background:var(--surface2);color:var(--gold);font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer">
+        📝 Journal CSV
+      </button>
+    </div>
+    <button onclick="downloadCSV('all')" style="width:100%;margin-top:8px;padding:12px;border-radius:var(--r-sm);border:none;background:var(--accent);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer">
+      ⬇️ Download All (ZIP)
+    </button>
+  </div>
+
+  <!-- JSON BACKUP -->
+  <div class="card card-sm">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;margin-bottom:4px">💾 JSON Backup</div>
+    <div style="font-size:0.74rem;color:var(--muted);margin-bottom:12px">Full backup file — import to restore all data</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="exportData()" style="flex:1;padding:12px 8px;border-radius:var(--r-sm);border:1.5px solid var(--accent3);background:var(--surface2);color:var(--accent3);font-family:'Syne',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer">📤 Export</button>
+      <button onclick="document.getElementById('importFile').click()" style="flex:1;padding:12px 8px;border-radius:var(--r-sm);border:1.5px solid var(--gold);background:var(--surface2);color:var(--gold);font-family:'Syne',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer">📥 Import</button>
+    </div>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+  </div>
+
+  <!-- DATA SUMMARY -->
+  <div class="card card-sm">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;margin-bottom:12px">📊 Your Data</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;margin-bottom:8px;display:flex;justify-content:space-between"><span style="font-size:0.8rem;color:var(--muted)">Tasks</span><strong id="s-tasks">0</strong></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;margin-bottom:8px;display:flex;justify-content:space-between"><span style="font-size:0.8rem;color:var(--muted)">Habits</span><strong id="s-habits">0</strong></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;margin-bottom:8px;display:flex;justify-content:space-between"><span style="font-size:0.8rem;color:var(--muted)">Goals</span><strong id="s-goals">0</strong></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;margin-bottom:8px;display:flex;justify-content:space-between"><span style="font-size:0.8rem;color:var(--muted)">Journal Entries</span><strong id="s-journal">0</strong></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 14px;display:flex;justify-content:space-between"><span style="font-size:0.8rem;color:var(--muted)">Last Backup</span><strong id="s-lastbackup" style="font-size:0.78rem">Never</strong></div>
+  </div>
+
+  <!-- SAFETY INFO -->
+  <div class="card card-sm">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;margin-bottom:10px">🛡️ Data Safety</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between"><span style="font-size:0.78rem">Reinstall PWA / reopen app</span><strong style="color:var(--accent3);font-size:0.78rem">Safe ✅</strong></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between"><span style="font-size:0.78rem">Phone restarts</span><strong style="color:var(--accent3);font-size:0.78rem">Safe ✅</strong></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between"><span style="font-size:0.78rem">Google Drive backup</span><strong style="color:var(--accent3);font-size:0.78rem">Safe ✅</strong></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between"><span style="font-size:0.78rem">Clearing site/browser data</span><strong style="color:var(--accent2);font-size:0.78rem">Lost ❌</strong></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between"><span style="font-size:0.78rem">Factory reset / new phone</span><strong style="color:var(--accent2);font-size:0.78rem">Lost ❌</strong></div>
+  </div>
+
+  <!-- DANGER ZONE -->
+  <div class="card card-sm">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;margin-bottom:6px;color:var(--accent2)">⚠️ Danger Zone</div>
+    <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px">Permanently deletes ALL data. Backup first!</div>
+    <button onclick="clearAllData()" style="width:100%;padding:12px;border-radius:var(--r-sm);border:1.5px solid var(--accent2);background:var(--accent2)11;color:var(--accent2);font-family:'Syne',sans-serif;font-weight:700;font-size:0.86rem;cursor:pointer">🗑️ Clear All Data</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav>
+  <button class="nav-item active" onclick="goTo('dashboard',this)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+    Home<div class="nav-dot"></div>
+  </button>
+  <button class="nav-item" onclick="goTo('tasks',this)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg>
+    Tasks<div class="nav-dot"></div>
+  </button>
+  <button class="nav-item" onclick="goTo('habits',this)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    Habits<div class="nav-dot"></div>
+  </button>
+  <button class="nav-item" onclick="goTo('goals',this)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    Goals<div class="nav-dot"></div>
+  </button>
+  <button class="nav-item" onclick="goTo('focus',this)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Focus<div class="nav-dot"></div>
+  </button>
+  <button class="nav-item" onclick="goTo('settings',this)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    Settings<div class="nav-dot"></div>
+  </button>
+</nav>
+
+<!-- TASK MODAL -->
+<div class="backdrop" id="taskModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="taskModalTitle">New Task</div>
+    <div class="form-group"><label>Task Name *</label><input type="text" id="f-tName" placeholder="What needs to be done?"></div>
+    <div class="grid2">
+      <div class="form-group"><label>Category</label>
+        <select id="f-tCat"><option value="work">💼 Work</option><option value="personal">🏠 Personal</option><option value="health">💪 Health</option><option value="study">📚 Study</option><option value="other">⭐ Other</option></select>
+      </div>
+      <div class="form-group"><label>Priority</label>
+        <select id="f-tPrio"><option value="high">🔴 High</option><option value="medium">🟡 Medium</option><option value="low">🟢 Low</option></select>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="form-group"><label>Date</label><input type="date" id="f-tDate"></div>
+      <div class="form-group"><label>Time</label><input type="time" id="f-tTime"></div>
+    </div>
+    <div class="form-group"><label>Notes</label><textarea id="f-tNotes" placeholder="Any details…" style="height:70px"></textarea></div>
+    <button class="btn btn-primary" id="taskSaveBtn" onclick="saveTask()">Add Task</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="closeModal('taskModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- HABIT MODAL -->
+<div class="backdrop" id="habitModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">New Habit</div>
+    <div class="form-group"><label>Habit Name *</label><input type="text" id="f-hName" placeholder="e.g. Morning run"></div>
+    <div class="grid2">
+      <div class="form-group"><label>Emoji</label><input type="text" id="f-hEmoji" placeholder="🔥" maxlength="4"></div>
+      <div class="form-group"><label>Category</label>
+        <select id="f-hCat"><option>Health</option><option>Mindset</option><option>Fitness</option><option>Learning</option><option>Business</option><option>Social</option></select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveHabit()">Add Habit</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="closeModal('habitModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- GOAL MODAL -->
+<div class="backdrop" id="goalModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="goalModalTitle">New Goal</div>
+    <div class="form-group"><label>Goal Title *</label><input type="text" id="f-gTitle" placeholder="What do you want to achieve?"></div>
+    <div class="form-group"><label>Description</label><textarea id="f-gDesc" placeholder="Why does this matter…" style="height:70px"></textarea></div>
+    <div class="grid2">
+      <div class="form-group"><label>Deadline</label><input type="date" id="f-gDeadline"></div>
+      <div class="form-group"><label>Category</label>
+        <select id="f-gCat"><option>Business</option><option>Personal</option><option>Health</option><option>Finance</option><option>Learning</option></select>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="goalSaveBtn" onclick="saveGoal()">Add Goal</button>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="closeModal('goalModal')">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="installBanner">
+  <div style="font-size:1.4rem">⛰️</div>
+  <div style="flex:1"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.86rem;color:#fff">Install CLIMB PRO</div><div style="font-size:0.7rem;color:rgba(255,255,255,0.85)">Add to home screen</div></div>
+  <button id="installBtn" style="background:#fff;color:var(--accent);border:none;border-radius:20px;padding:6px 13px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.76rem;cursor:pointer">Install</button>
+  <button id="installX" style="background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;padding:4px">✕</button>
+</div>
+
+<div id="iosHint">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.86rem">📲 Install on iPhone</div>
+    <button id="iosX" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem">✕</button>
+  </div>
+  <div style="font-size:0.78rem;color:#a0a0bb;line-height:1.6">Tap <strong style="color:#fff">Share 📤</strong> in Safari → <strong style="color:#fff">"Add to Home Screen"</strong></div>
+</div>
+
+<div id="offlineBanner">📡 Offline — all data saved locally</div>
+
+<script>
+// ── STORAGE ──────────────────────────────────────────────
+const DB={
+  get:k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}},
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){console.warn(e)}}
+};
+
+// ── STATE ────────────────────────────────────────────────
+let tasks   = DB.get('cp3_tasks')   || [];
+let habits  = DB.get('cp3_habits')  || [];
+let goals   = DB.get('cp3_goals')   || [];
+let journal = DB.get('cp3_journal') || [];
+let streak  = DB.get('cp3_streak')  || {count:0,last:''};
+let pomo    = DB.get('cp3_pomo')    || {date:'',count:0,breaks:0};
+let taskFilter='all', editTaskId=null, editGoalId=null, currentMood='';
+
+// ── DATE ─────────────────────────────────────────────────
+const now=new Date();
+const todayStr=now.toISOString().split('T')[0];
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+document.getElementById('dateLabel').textContent=DAYS[now.getDay()].slice(0,3)+', '+MONTHS[now.getMonth()]+' '+now.getDate();
+
+// ── HELPERS ──────────────────────────────────────────────
+function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400)}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.backdrop').forEach(el=>{el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open')})});
+
+// ── NAV ──────────────────────────────────────────────────
+function goTo(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── QUICK ADD ────────────────────────────────────────────
+function quickAdd(){
+  const inp=document.getElementById('quickInput');
+  const name=inp.value.trim();
+  if(!name)return;
+  tasks.push({id:Date.now(),name,category:'work',priority:'medium',date:todayStr,time:'',notes:'',done:false});
+  inp.value='';
+  DB.set('cp3_tasks',tasks);
+  renderAll();
+  toast('✅ Task added!');
+}
+document.getElementById('quickInput').addEventListener('keydown',e=>{if(e.key==='Enter')quickAdd()});
+
+// ── TASKS ────────────────────────────────────────────────
+function openTaskModal(id){
+  editTaskId=id||null;
+  if(editTaskId){
+    const t=tasks.find(t=>t.id===editTaskId);
+    if(!t)return;
+    document.getElementById('taskModalTitle').textContent='✏️ Edit Task';
+    document.getElementById('taskSaveBtn').textContent='Save Changes';
+    document.getElementById('f-tName').value=t.name;
+    document.getElementById('f-tCat').value=t.category;
+    document.getElementById('f-tPrio').value=t.priority;
+    document.getElementById('f-tDate').value=t.date||'';
+    document.getElementById('f-tTime').value=t.time||'';
+    document.getElementById('f-tNotes').value=t.notes||'';
+  }else{
+    document.getElementById('taskModalTitle').textContent='New Task';
+    document.getElementById('taskSaveBtn').textContent='Add Task';
+    document.getElementById('f-tName').value='';
+    document.getElementById('f-tCat').value='work';
+    document.getElementById('f-tPrio').value='medium';
+    document.getElementById('f-tDate').value=todayStr;
+    document.getElementById('f-tTime').value='';
+    document.getElementById('f-tNotes').value='';
+  }
+  openModal('taskModal');
+}
+
+function saveTask(){
+  const name=document.getElementById('f-tName').value.trim();
+  if(!name){toast('⚠️ Task name required');return}
+  const data={name,category:document.getElementById('f-tCat').value,priority:document.getElementById('f-tPrio').value,date:document.getElementById('f-tDate').value||todayStr,time:document.getElementById('f-tTime').value,notes:document.getElementById('f-tNotes').value};
+  if(editTaskId){
+    tasks=tasks.map(t=>t.id===editTaskId?{...t,...data}:t);
+    toast('✏️ Task updated!');
+  }else{
+    tasks.push({id:Date.now(),...data,done:false});
+    toast('✅ Task added!');
+  }
+  DB.set('cp3_tasks',tasks);
+  closeModal('taskModal');
+  renderAll();
+}
+
+function toggleTask(id){
+  tasks=tasks.map(t=>t.id===id?{...t,done:!t.done}:t);
+  DB.set('cp3_tasks',tasks);
+  checkStreak();
+  renderAll();
+}
+
+function deleteTask(id){
+  tasks=tasks.filter(t=>t.id!==id);
+  DB.set('cp3_tasks',tasks);
+  renderAll();
+  toast('🗑️ Deleted');
+}
+
+function setFilter(f,btn){
+  taskFilter=f;
+  document.querySelectorAll('.chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTaskList();
+}
+
+function tagClass(cat){return({work:'tag-work',personal:'tag-personal',health:'tag-health',study:'tag-study',other:'tag-other'})[cat]||'tag-other'}
+
+function makeTaskEl(t){
+  const d=document.createElement('div');d.className='task-item';
+  const pc=({high:'prio-high',medium:'prio-medium',low:'prio-low'})[t.priority]||'prio-low';
+  d.innerHTML=`
+    <div class="prio-dot ${pc}"></div>
+    <button class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})">
+      ${t.done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>':''}
+    </button>
+    <div class="task-body">
+      <div class="task-name ${t.done?'done':''}">${esc(t.name)}</div>
+      <div class="task-meta"><span class="tag ${tagClass(t.category)}">${esc(t.category)}</span>${t.date?t.date.slice(5).replace('-','/'):''}${t.time?' '+t.time:''}</div>
+    </div>
+    <div class="task-actions">
+      <button class="act-btn" onclick="openTaskModal(${t.id})" style="color:var(--accent)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+      <button class="act-btn" onclick="deleteTask(${t.id})" style="color:var(--accent2)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </button>
+    </div>`;
+  return d;
+}
+
+function renderTaskList(){
+  const el=document.getElementById('taskListFull');
+  let list=[...tasks];
+  if(taskFilter==='today')list=list.filter(t=>t.date===todayStr);
+  else if(['work','personal','health','study'].includes(taskFilter))list=list.filter(t=>t.category===taskFilter);
+  list.sort((a,b)=>a.done!==b.done?(a.done?1:-1):(a.date||'')>(b.date||'')?1:-1);
+  if(!list.length){el.innerHTML='<div class="empty"><div class="emoji">📭</div><p>No tasks here!</p></div>';return}
+  el.innerHTML='';
+  const card=document.createElement('div');card.className='card card-sm';
+  list.forEach(t=>card.appendChild(makeTaskEl(t)));
+  el.appendChild(card);
+}
+
+function renderDashboard(){
+  const td=tasks.filter(t=>t.date===todayStr);
+  const dn=td.filter(t=>t.done);
+  document.getElementById('stat-tasks').textContent=td.length;
+  document.getElementById('stat-done').textContent=dn.length;
+  document.getElementById('stat-streak').textContent=(streak.count||0)+'🔥';
+  const pct=td.length?Math.round(dn.length/td.length*100):0;
+  const circ=201.1;
+  document.getElementById('ringCircle').style.strokeDashoffset=circ-circ*pct/100;
+  document.getElementById('ringPct').textContent=pct+'%';
+  document.getElementById('ringText').textContent=td.length?`${dn.length} of ${td.length} done`:'No tasks today yet!';
+  const hs=habitScore();
+  const score=Math.round(pct*0.6+hs*0.4);
+  document.getElementById('scoreNum').textContent=score;
+  document.getElementById('scoreMsg').textContent=score>=90?'🏆 Outstanding!':score>=70?'🚀 Crushing it!':score>=50?'💪 Good progress':score>=20?'⚡ Keep pushing!':'🌅 Let\'s go!';
+  const dl=document.getElementById('dashTaskList');
+  dl.innerHTML='';
+  if(!td.length){dl.innerHTML='<div class="empty"><div class="emoji">📋</div><p>No tasks today!</p></div>';return}
+  const card=document.createElement('div');card.className='card card-sm';card.style.margin='0';
+  td.sort((a,b)=>a.done!==b.done?(a.done?1:-1):0).slice(0,6).forEach(t=>card.appendChild(makeTaskEl(t)));
+  dl.appendChild(card);
+}
+
+// ── HABITS ───────────────────────────────────────────────
+function saveHabit(){
+  const name=document.getElementById('f-hName').value.trim();
+  if(!name){toast('⚠️ Habit name required');return}
+  habits.push({id:Date.now(),name,emoji:document.getElementById('f-hEmoji').value||'⭐',category:document.getElementById('f-hCat').value,days:{},streak:0});
+  DB.set('cp3_habits',habits);
+  document.getElementById('f-hName').value='';document.getElementById('f-hEmoji').value='';
+  closeModal('habitModal');renderHabits();toast('🌱 Habit added!');
+}
+
+function toggleHabitDay(id,ds){
+  habits=habits.map(h=>{
+    if(h.id!==id)return h;
+    if(!h.days)h.days={};
+    h.days[ds]=!h.days[ds];
+    h.streak=calcStreak(h.days);
+    return h;
+  });
+  DB.set('cp3_habits',habits);renderHabits();renderDashboard();
+}
+
+function deleteHabit(id){habits=habits.filter(h=>h.id!==id);DB.set('cp3_habits',habits);renderHabits();toast('🗑️ Habit removed')}
+
+function calcStreak(days){let s=0,d=new Date();for(let i=0;i<365;i++){const ds=d.toISOString().split('T')[0];if(days[ds]){s++;d=new Date(d-86400000)}else break}return s}
+
+function habitScore(){if(!habits.length)return 0;let done=0;habits.forEach(h=>{if(h.days&&h.days[todayStr])done++});return Math.round(done/habits.length*100)}
+
+function weekDays(){const arr=[];for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);arr.push({str:d.toISOString().split('T')[0],lbl:'SMTWTFS'[d.getDay()]})}return arr}
+
+function renderHabits(){
+  const el=document.getElementById('habitList');
+  if(!habits.length){el.innerHTML='<div class="empty"><div class="emoji">🌱</div><p>Add your first habit!</p></div>';return}
+  el.innerHTML='';
+  const wk=weekDays();
+  habits.forEach(h=>{
+    const div=document.createElement('div');div.className='habit-row';
+    div.innerHTML=`
+      <div class="habit-emoji">${esc(h.emoji||'⭐')}</div>
+      <div class="habit-info">
+        <strong>${esc(h.name)}</strong><span>${esc(h.category)}</span>
+        <div class="week-dots">${wk.map(d=>`<button class="wdot ${h.days&&h.days[d.str]?'checked':''}" onclick="toggleHabitDay(${h.id},'${d.str}')">${h.days&&h.days[d.str]?'✓':d.lbl}</button>`).join('')}</div>
+      </div>
+      <div class="habit-right">
+        <div>${h.days&&h.days[todayStr]?'🔥':'⬜'}</div>
+        <div class="streak-num">${h.streak||0}</div>
+        <small>streak</small>
+        <button onclick="deleteHabit(${h.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.72rem;margin-top:4px;display:block">✕</button>
+      </div>`;
+    el.appendChild(div);
+  });
+}
+
+// ── GOALS ────────────────────────────────────────────────
+const GCOLS=['','pink','green','gold'];
+
+function openGoalModal(id){
+  editGoalId=id||null;
+  if(editGoalId){
+    const g=goals.find(g=>g.id===editGoalId);
+    if(!g)return;
+    document.getElementById('goalModalTitle').textContent='✏️ Edit Goal';
+    document.getElementById('goalSaveBtn').textContent='Save Changes';
+    document.getElementById('f-gTitle').value=g.title;
+    document.getElementById('f-gDesc').value=g.desc||'';
+    document.getElementById('f-gDeadline').value=g.deadline||'';
+    document.getElementById('f-gCat').value=g.category;
+  }else{
+    document.getElementById('goalModalTitle').textContent='New Goal';
+    document.getElementById('goalSaveBtn').textContent='Add Goal';
+    document.getElementById('f-gTitle').value='';
+    document.getElementById('f-gDesc').value='';
+    document.getElementById('f-gDeadline').value='';
+    document.getElementById('f-gCat').value='Business';
+  }
+  openModal('goalModal');
+}
+
+function saveGoal(){
+  const title=document.getElementById('f-gTitle').value.trim();
+  if(!title){toast('⚠️ Goal title required');return}
+  const data={title,desc:document.getElementById('f-gDesc').value,deadline:document.getElementById('f-gDeadline').value,category:document.getElementById('f-gCat').value};
+  if(editGoalId){
+    goals=goals.map(g=>g.id===editGoalId?{...g,...data}:g);
+    toast('✏️ Goal updated!');
+  }else{
+    goals.push({id:Date.now(),...data,progress:0,color:GCOLS[goals.length%4]});
+    toast('🎯 Goal added!');
+  }
+  DB.set('cp3_goals',goals);closeModal('goalModal');renderGoals();
+}
+
+function updateProgress(id,val){
+  goals=goals.map(g=>g.id===id?{...g,progress:+val}:g);
+  DB.set('cp3_goals',goals);
+  const p=document.getElementById('gpct-'+id);const b=document.getElementById('gbar-'+id);
+  if(p)p.textContent=val+'%';if(b)b.style.width=val+'%';
+}
+
+function deleteGoal(id){goals=goals.filter(g=>g.id!==id);DB.set('cp3_goals',goals);renderGoals();toast('🗑️ Goal removed')}
+
+function renderGoals(){
+  const el=document.getElementById('goalList');
+  if(!goals.length){el.innerHTML='<div class="empty"><div class="emoji">🎯</div><p>Set your first goal!</p></div>';return}
+  el.innerHTML='';
+  goals.forEach(g=>{
+    const d=document.createElement('div');d.className='goal-card '+(g.color||'');
+    const dl=g.deadline?Math.ceil((new Date(g.deadline)-now)/86400000):null;
+    const dls=dl!==null?(dl>0?dl+' days left':dl===0?'Due today!':Math.abs(dl)+' days overdue'):'';
+    d.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:3px">
+        <div style="flex:1;min-width:0">
+          <div class="goal-title">${esc(g.title)}</div>
+          <div class="goal-sub">${esc(g.category)}${dls?' • '+dls:''}</div>
+          ${g.desc?`<div style="font-size:0.76rem;color:var(--muted);margin-bottom:7px">${esc(g.desc)}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;margin-left:8px">
+          <button onclick="openGoalModal(${g.id})" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:2px">✏️</button>
+          <button onclick="deleteGoal(${g.id})" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:2px">🗑️</button>
+        </div>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="gbar-${g.id}" style="width:${g.progress||0}%"></div></div>
+      <div class="goal-footer">
+        <input type="range" min="0" max="100" value="${g.progress||0}" oninput="updateProgress(${g.id},this.value)">
+        <span class="goal-pct" id="gpct-${g.id}">${g.progress||0}%</span>
+      </div>`;
+    el.appendChild(d);
+  });
+}
+
+// ── JOURNAL ──────────────────────────────────────────────
+function pickMood(emoji,btn){currentMood=emoji;document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+
+function saveJournal(){
+  const title=document.getElementById('jTitle').value.trim();
+  const text=document.getElementById('jText').value.trim();
+  if(!title&&!text){toast('⚠️ Write something first!');return}
+  journal.unshift({id:Date.now(),title:title||'Untitled',text,mood:currentMood,date:todayStr,time:now.toTimeString().slice(0,5)});
+  DB.set('cp3_journal',journal);
+  document.getElementById('jTitle').value='';document.getElementById('jText').value='';
+  currentMood='';document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
+  renderJournal();toast('📝 Saved!');
+}
+
+function deleteJournal(id){journal=journal.filter(j=>j.id!==id);DB.set('cp3_journal',journal);renderJournal()}
+
+function renderJournal(){
+  const el=document.getElementById('journalList');el.innerHTML='';
+  if(!journal.length)return;
+  journal.slice(0,20).forEach(j=>{
+    const d=document.createElement('div');d.className='note-card';
+    d.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <h4>${j.mood?j.mood+' ':''}${esc(j.title)}</h4>
+        <button onclick="deleteJournal(${j.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.82rem;flex-shrink:0;margin-left:6px">✕</button>
+      </div>
+      <p>${esc(j.text)}</p><small>${j.date} at ${j.time}</small>`;
+    el.appendChild(d);
+  });
+}
+
+// ── POMODORO ─────────────────────────────────────────────
+const MODES={work:25*60,short:5*60,long:15*60};
+let timerMode='work',timerSecs=25*60,timerMax=25*60,timerRunning=false,timerInt=null;
+
+function setMode(m,btn){
+  if(timerRunning)return;
+  timerMode=m;timerMax=timerSecs=MODES[m];
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  updateTimerUI();
+}
+
+function toggleTimer(){
+  if(timerRunning){
+    clearInterval(timerInt);timerRunning=false;document.getElementById('timerBtn').textContent='Resume';
+  }else{
+    timerRunning=true;document.getElementById('timerBtn').textContent='Pause';
+    timerInt=setInterval(()=>{timerSecs--;updateTimerUI();if(timerSecs<=0){clearInterval(timerInt);timerRunning=false;onTimerEnd()}},1000);
+  }
+}
+
+function resetTimer(){clearInterval(timerInt);timerRunning=false;timerSecs=timerMax;document.getElementById('timerBtn').textContent='Start';updateTimerUI()}
+
+function onTimerEnd(){
+  const td=new Date().toISOString().split('T')[0];
+  if(pomo.date!==td)pomo={date:td,count:0,breaks:0};
+  if(timerMode==='work')pomo.count++;else pomo.breaks++;
+  DB.set('cp3_pomo',pomo);renderPomodoro();
+  document.getElementById('timerBtn').textContent='Start';
+  toast(timerMode==='work'?'🍅 Pomodoro done!':'☕ Break over!');
+}
+
+function updateTimerUI(){
+  const m=Math.floor(timerSecs/60),s=timerSecs%60;
+  document.getElementById('timerNum').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  const circ=427.2;
+  document.getElementById('timerRing').style.strokeDashoffset=circ*(1-timerSecs/timerMax);
+  document.getElementById('timerRing').style.stroke=timerMode==='work'?'#7c6bff':timerMode==='short'?'#6bffb8':'#ffd166';
+}
+
+function renderPomodoro(){
+  const td=new Date().toISOString().split('T')[0];
+  if(pomo.date!==td)pomo={date:td,count:0,breaks:0};
+  document.getElementById('pomoCount').textContent=pomo.count;
+  document.getElementById('focusMin').textContent=(pomo.count*25)+'m';
+  document.getElementById('breakCount').textContent=pomo.breaks;
+  const dots=document.getElementById('pomoDots');dots.innerHTML='';
+  for(let i=0;i<4;i++){const d=document.createElement('div');d.className='pomo-dot'+(i<pomo.count%4?' lit':'');dots.appendChild(d)}
+}
+
+function pickFocusTask(){
+  const pending=tasks.filter(t=>!t.done);
+  if(!pending.length){toast('No pending tasks!');return}
+  const choice=prompt('Pick task to focus on:\n'+pending.slice(0,8).map((t,i)=>`${i+1}. ${t.name}`).join('\n')+'\n\nEnter number:');
+  const idx=parseInt(choice)-1;
+  if(pending[idx])document.getElementById('focusTask').textContent=pending[idx].name;
+}
+
+// ── STREAK ───────────────────────────────────────────────
+function checkStreak(){
+  const td=tasks.filter(t=>t.date===todayStr);
+  if(td.length&&td.every(t=>t.done)){
+    if(streak.last!==todayStr){
+      const yest=new Date(now-86400000).toISOString().split('T')[0];
+      streak.count=streak.last===yest?streak.count+1:1;
+      streak.last=todayStr;
+      DB.set('cp3_streak',streak);
+    }
+  }
+}
+
+// ── RENDER ALL ───────────────────────────────────────────
+function renderAll(){renderDashboard();renderTaskList();renderHabits();renderGoals();renderJournal();renderPomodoro();renderSettings()}
+
+// ── INIT ─────────────────────────────────────────────────
+renderAll();
+updateTimerUI();
+
+// ── PWA ──────────────────────────────────────────────────
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW:',e));
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBanner').style.display='flex'});
+document.getElementById('installBtn').addEventListener('click',async()=>{
+  if(!deferredPrompt)return;deferredPrompt.prompt();
+  const{outcome}=await deferredPrompt.userChoice;
+  if(outcome==='accepted'){document.getElementById('installBanner').style.display='none';toast('🎉 App installed!')}
+  deferredPrompt=null;
+});
+document.getElementById('installX').addEventListener('click',()=>{document.getElementById('installBanner').style.display='none'});
+
+const isIOS=/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+if(isIOS&&!navigator.standalone&&!sessionStorage.getItem('iosHint')){
+  setTimeout(()=>{document.getElementById('iosHint').style.display='flex';sessionStorage.setItem('iosHint','1')},3000);
+}
+document.getElementById('iosX').addEventListener('click',()=>{document.getElementById('iosHint').style.display='none'});
+
+function syncOnline(){document.getElementById('offlineBanner').style.display=navigator.onLine?'none':'block'}
+window.addEventListener('online',syncOnline);window.addEventListener('offline',syncOnline);syncOnline();
+
+// ── GOOGLE DRIVE ─────────────────────────────────────────
+const DRIVE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'; // user replaces this
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const DRIVE_FILE_NAME = 'climbpro-backup.json';
+let driveToken = null;
+let driveFileId = DB.get('cp3_driveFileId') || null;
+
+function connectGoogleDrive(){
+  // Use Google Identity Services
+  if(typeof google === 'undefined'){
+    toast('⚠️ Loading Google… try again in a second');
+    loadGoogleScript(connectGoogleDrive);
+    return;
+  }
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: DRIVE_CLIENT_ID,
+    scope: DRIVE_SCOPE,
+    callback: (resp) => {
+      if(resp.error){ toast('❌ Google login failed'); return; }
+      driveToken = resp.access_token;
+      DB.set('cp3_driveToken', driveToken);
+      // Get user email
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: 'Bearer ' + driveToken }
+      }).then(r=>r.json()).then(info=>{
+        DB.set('cp3_driveEmail', info.email || 'Connected');
+        showDriveConnected(info.email || 'Connected');
+        toast('✅ Google Drive connected!');
+      });
+    }
+  });
+  client.requestAccessToken();
+}
+
+function loadGoogleScript(cb){
+  if(document.getElementById('gsi-script')) return;
+  const s = document.createElement('script');
+  s.id = 'gsi-script';
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.onload = cb;
+  document.head.appendChild(s);
+}
+
+function showDriveConnected(email){
+  document.getElementById('driveNotConnected').style.display = 'none';
+  document.getElementById('driveConnected').style.display = 'block';
+  document.getElementById('driveEmail').textContent = email;
+  const ls = DB.get('cp3_driveLastSync');
+  document.getElementById('driveLastSync').textContent = ls ? 'Last backup: ' + ls : 'Last backup: Never';
+}
+
+function disconnectDrive(){
+  if(!confirm('Disconnect Google Drive?')) return;
+  driveToken = null; driveFileId = null;
+  ['cp3_driveToken','cp3_driveFileId','cp3_driveEmail','cp3_driveLastSync'].forEach(k=>localStorage.removeItem(k));
+  document.getElementById('driveNotConnected').style.display = 'block';
+  document.getElementById('driveConnected').style.display = 'none';
+  toast('Disconnected from Google Drive');
+}
+
+async function backupToDrive(){
+  if(!driveToken){ toast('⚠️ Connect Google Drive first'); return; }
+  const btn = document.getElementById('driveBackupBtn');
+  btn.textContent = '⏳ Saving…'; btn.disabled = true;
+  try {
+    const backup = JSON.stringify({version:3,exportedAt:new Date().toISOString(),tasks,habits,goals,journal,streak,pomo}, null, 2);
+    const blob = new Blob([backup], {type:'application/json'});
+    let res;
+    if(driveFileId){
+      // Update existing file
+      res = await fetch('https://www.googleapis.com/upload/drive/v3/files/'+driveFileId+'?uploadType=media', {
+        method:'PATCH', headers:{Authorization:'Bearer '+driveToken,'Content-Type':'application/json'}, body: blob
+      });
+    } else {
+      // Create new file
+      const meta = new Blob([JSON.stringify({name:DRIVE_FILE_NAME, mimeType:'application/json'})], {type:'application/json'});
+      const form = new FormData();
+      form.append('metadata', meta);
+      form.append('file', blob);
+      res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method:'POST', headers:{Authorization:'Bearer '+driveToken}, body: form
+      });
+    }
+    if(res.ok){
+      const data = await res.json();
+      if(!driveFileId){ driveFileId = data.id; DB.set('cp3_driveFileId', driveFileId); }
+      const now2 = new Date().toLocaleString();
+      DB.set('cp3_driveLastSync', now2);
+      DB.set('cp3_lastbackup', now2);
+      document.getElementById('driveLastSync').textContent = 'Last backup: ' + now2;
+      renderSettings();
+      toast('☁️ Backed up to Google Drive!');
+    } else { throw new Error('Upload failed'); }
+  } catch(e){
+    console.error(e);
+    toast('❌ Backup failed — try reconnecting');
+  }
+  btn.textContent = '☁️ Backup Now'; btn.disabled = false;
+}
+
+async function restoreFromDrive(){
+  if(!driveToken){ toast('⚠️ Connect Google Drive first'); return; }
+  if(!driveFileId){ toast('⚠️ No backup found in Drive yet'); return; }
+  if(!confirm('Restore from Google Drive? This replaces your current data.')) return;
+  try {
+    const res = await fetch('https://www.googleapis.com/drive/v3/files/'+driveFileId+'?alt=media', {
+      headers:{Authorization:'Bearer '+driveToken}
+    });
+    if(!res.ok) throw new Error();
+    const data = await res.json();
+    tasks   = data.tasks   || [];
+    habits  = data.habits  || [];
+    goals   = data.goals   || [];
+    journal = data.journal || [];
+    streak  = data.streak  || {count:0,last:''};
+    pomo    = data.pomo    || {date:'',count:0,breaks:0};
+    DB.set('cp3_tasks',tasks);DB.set('cp3_habits',habits);
+    DB.set('cp3_goals',goals);DB.set('cp3_journal',journal);
+    DB.set('cp3_streak',streak);DB.set('cp3_pomo',pomo);
+    renderAll();
+    toast('🔄 Data restored from Google Drive!');
+  } catch(e){
+    toast('❌ Restore failed — backup may not exist yet');
+  }
+}
+
+// Init Drive UI on load
+(function initDrive(){
+  const token = DB.get('cp3_driveToken');
+  const email = DB.get('cp3_driveEmail');
+  if(token && email){
+    driveToken = token;
+    driveFileId = DB.get('cp3_driveFileId');
+    showDriveConnected(email);
+  }
+  loadGoogleScript(()=>{});
+})();
+
+// ── CSV DOWNLOAD ──────────────────────────────────────────
+function toCSV(headers, rows){
+  const esc = v => '"' + String(v||'').replace(/"/g,'""') + '"';
+  return [headers.map(esc).join(','), ...rows.map(r=>r.map(esc).join(','))].join('\n');
+}
+
+function downloadCSV(type){
+  let csv='', filename='';
+  if(type==='tasks' || type==='all'){
+    csv = toCSV(
+      ['Name','Category','Priority','Date','Time','Notes','Done'],
+      tasks.map(t=>[t.name,t.category,t.priority,t.date,t.time,t.notes,t.done?'Yes':'No'])
+    );
+    if(type==='tasks'){ triggerDownload(csv,'climbpro-tasks-'+todayStr+'.csv','text/csv'); toast('📋 Tasks CSV downloaded!'); return; }
+  }
+  if(type==='habits' || type==='all'){
+    csv = toCSV(
+      ['Name','Category','Emoji','Current Streak','Done Today'],
+      habits.map(h=>[h.name,h.category,h.emoji||'',h.streak||0,h.days&&h.days[todayStr]?'Yes':'No'])
+    );
+    if(type==='habits'){ triggerDownload(csv,'climbpro-habits-'+todayStr+'.csv','text/csv'); toast('🔥 Habits CSV downloaded!'); return; }
+  }
+  if(type==='goals' || type==='all'){
+    csv = toCSV(
+      ['Title','Category','Description','Deadline','Progress %'],
+      goals.map(g=>[g.title,g.category,g.desc||'',g.deadline||'',g.progress||0])
+    );
+    if(type==='goals'){ triggerDownload(csv,'climbpro-goals-'+todayStr+'.csv','text/csv'); toast('🎯 Goals CSV downloaded!'); return; }
+  }
+  if(type==='journal' || type==='all'){
+    csv = toCSV(
+      ['Date','Time','Mood','Title','Entry'],
+      journal.map(j=>[j.date,j.time,j.mood||'',j.title,j.text])
+    );
+    if(type==='journal'){ triggerDownload(csv,'climbpro-journal-'+todayStr+'.csv','text/csv'); toast('📝 Journal CSV downloaded!'); return; }
+  }
+  if(type==='all'){
+    // Download all 4 one by one with small delay
+    const files = [
+      ['tasks','climbpro-tasks'],['habits','climbpro-habits'],
+      ['goals','climbpro-goals'],['journal','climbpro-journal']
+    ];
+    files.forEach(([t,name],i)=>{
+      setTimeout(()=>downloadCSV(t), i*400);
+    });
+    toast('⬇️ Downloading all CSVs…');
+  }
+}
+
+function triggerDownload(content, filename, mime){
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── BACKUP & RESTORE ─────────────────────────────────────
+function exportData(){
+  const backup={
+    version:3,
+    exportedAt:new Date().toISOString(),
+    tasks, habits, goals, journal, streak, pomo
+  };
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='climbpro-backup-'+todayStr+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  DB.set('cp3_lastbackup', new Date().toLocaleString());
+  renderSettings();
+  toast('📤 Backup saved!');
+}
+
+function importData(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!data.version){toast('❌ Invalid backup file');return}
+      if(!confirm('This will REPLACE all your current data with the backup. Continue?'))return;
+      tasks   = data.tasks   || [];
+      habits  = data.habits  || [];
+      goals   = data.goals   || [];
+      journal = data.journal || [];
+      streak  = data.streak  || {count:0,last:''};
+      pomo    = data.pomo    || {date:'',count:0,breaks:0};
+      DB.set('cp3_tasks',tasks);DB.set('cp3_habits',habits);
+      DB.set('cp3_goals',goals);DB.set('cp3_journal',journal);
+      DB.set('cp3_streak',streak);DB.set('cp3_pomo',pomo);
+      renderAll();renderSettings();
+      toast('📥 Data restored successfully!');
+    }catch(err){
+      toast('❌ Could not read backup file');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+function clearAllData(){
+  if(!confirm('Delete ALL data permanently? This cannot be undone!'))return;
+  if(!confirm('Are you 100% sure? Export a backup first if needed.'))return;
+  tasks=[];habits=[];goals=[];journal=[];
+  streak={count:0,last:''};pomo={date:'',count:0,breaks:0};
+  ['cp3_tasks','cp3_habits','cp3_goals','cp3_journal','cp3_streak','cp3_pomo','cp3_lastbackup'].forEach(k=>localStorage.removeItem(k));
+  renderAll();renderSettings();
+  toast('🗑️ All data cleared');
+}
+
+function renderSettings(){
+  const el=id=>document.getElementById(id);
+  if(el('s-tasks'))   el('s-tasks').textContent   = tasks.length;
+  if(el('s-habits'))  el('s-habits').textContent  = habits.length;
+  if(el('s-goals'))   el('s-goals').textContent   = goals.length;
+  if(el('s-journal')) el('s-journal').textContent = journal.length;
+  const lb=DB.get('cp3_lastbackup');
+  if(el('s-lastbackup')) el('s-lastbackup').textContent = lb || 'Never';
+}
+</script>
+</body>
+</html>
