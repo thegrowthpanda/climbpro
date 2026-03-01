@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Daily Planner</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Daily Planner">
+<meta name="theme-color" content="#ffd6e0">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&family=Architects+Daughter&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pink:#ffd6e0;--mint:#c8f0e0;--blue:#b8deff;--yellow:#fff3b0;--peach:#ffd9c0;--lav:#e8d5ff;--green:#d4f0d4;
+  --pink-d:#ffadc8;--mint-d:#8edfc0;--blue-d:#7fc0f0;--yellow-d:#ffd966;--peach-d:#ffb899;--lav-d:#c4a8ff;
+  --text:#333;--muted:#777;--light:#aaa;
+  --r:18px;--r-sm:12px;--shadow:0 4px 16px rgba(0,0,0,0.08);
+}
+body{font-family:'Nunito',sans-serif;color:var(--text);min-height:100vh;padding-bottom:90px;
+  background-color:#fdf9f5;
+  background-image:linear-gradient(rgba(180,180,210,0.13) 1px,transparent 1px),linear-gradient(90deg,rgba(180,180,210,0.13) 1px,transparent 1px);
+  background-size:26px 26px;
+  -webkit-tap-highlight-color:transparent}
+header{padding:14px 16px 8px;text-align:center;position:sticky;top:0;z-index:100;
+  background:rgba(253,249,245,0.93);backdrop-filter:blur(14px);
+  border-bottom:2px dashed #e8d5ff}
+.title{font-family:'Fredoka One',cursive;font-size:1.9rem;letter-spacing:3px;
+  background:linear-gradient(120deg,#ff9ec4,#a8d8ff,#a8f0d0,#ffd966,#ff9ec4);
+  background-size:300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shine 5s linear infinite}
+@keyframes shine{to{background-position:300%}}
+.date-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:5px}
+.date-lbl{font-family:'Architects Daughter',cursive;font-size:0.78rem;color:var(--muted);font-weight:700;letter-spacing:1px}
+.date-val{background:var(--blue);border-radius:7px;padding:2px 12px;font-family:'Architects Daughter',cursive;font-size:0.78rem;color:#3a6aaa;min-width:120px;text-align:center}
+.days{display:flex;justify-content:center;gap:4px;margin-top:8px;flex-wrap:wrap}
+.day{padding:3px 9px;border-radius:7px;font-family:'Fredoka One',cursive;font-size:0.68rem;letter-spacing:0.3px}
+.d0{background:#ffd8c8;color:#aa5a3a}.d1{background:#c8f5c8;color:#3a8a3a}.d2{background:#c8e8ff;color:#3a6aaa}
+.d3{background:#ffe8c8;color:#aa6a3a}.d4{background:#ffc8c8;color:#aa3a3a}.d5{background:#d8c8ff;color:#6a3aaa}
+.d6{background:#c8ffee;color:#3aaa7a}.day.today{transform:scale(1.12);box-shadow:0 2px 8px rgba(0,0,0,0.12)}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.96);
+  border-top:2.5px solid var(--pink);display:flex;z-index:200;
+  padding:6px 0 max(8px,env(safe-area-inset-bottom));backdrop-filter:blur(12px)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px;
+  cursor:pointer;border:none;background:none;font-family:'Fredoka One',cursive;
+  font-size:0.6rem;color:#ccc;letter-spacing:0.3px;transition:0.2s}
+.ni.active{color:var(--pink-d)}.ni-ico{font-size:1.3rem;transition:transform 0.2s}
+.ni.active .ni-ico{transform:scale(1.18)}
+.view{display:none;padding:12px 12px 8px;animation:pop 0.25s ease}
+.view.active{display:block}
+@keyframes pop{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
+.card{border-radius:var(--r);padding:14px;margin-bottom:12px;position:relative}
+.ct{font-family:'Fredoka One',cursive;font-size:0.88rem;letter-spacing:0.8px;
+  display:inline-block;padding:3px 12px;border-radius:7px;margin-bottom:10px}
+.cb{background:var(--blue);box-shadow:0 5px 0 var(--blue-d),var(--shadow)}
+.cm{background:var(--mint);box-shadow:0 5px 0 var(--mint-d),var(--shadow)}
+.cy{background:var(--yellow);box-shadow:0 5px 0 var(--yellow-d),var(--shadow)}
+.cp{background:var(--pink);box-shadow:0 5px 0 var(--pink-d),var(--shadow)}
+.cpe{background:var(--peach);box-shadow:0 5px 0 var(--peach-d),var(--shadow)}
+.cl{background:var(--lav);box-shadow:0 5px 0 var(--lav-d),var(--shadow)}
+.cw{background:#fff;box-shadow:0 5px 0 #e8e0f0,var(--shadow)}
+.lb{background:var(--blue-d);color:#2a5a8a}.lm{background:var(--mint-d);color:#1a6a4a}
+.ly{background:var(--yellow-d);color:#7a5a00}.lp{background:var(--pink-d);color:#aa3a6a}
+.lpe{background:var(--peach-d);color:#aa4a2a}.ll{background:var(--lav-d);color:#5a2aaa}
+.stk{position:absolute;pointer-events:none;animation:wob 3s ease-in-out infinite}
+@keyframes wob{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qi{flex:1;background:rgba(255,255,255,0.7);border:2px dashed #b8deff;border-radius:12px;
+  padding:9px 12px;font-family:'Nunito',sans-serif;font-size:0.86rem;color:var(--text);outline:none}
+.qi:focus{border-color:#7fc0f0;background:#fff}
+.qi::placeholder{color:#aac8e0;font-style:italic}
+.qb{background:var(--blue-d);border:none;border-radius:12px;padding:9px 14px;
+  color:#fff;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;
+  box-shadow:0 3px 0 #5090c0}
+.qb:active{transform:translateY(2px);box-shadow:0 1px 0 #5090c0}
+.qbpe{background:var(--peach-d);box-shadow:0 3px 0 #e8906a}
+.qby{background:var(--yellow-d);color:#7a5a00;box-shadow:0 3px 0 #c0a020}
+.tl{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.65);
+  border-radius:10px;padding:8px 11px;margin-bottom:5px;
+  border:1.5px solid rgba(255,255,255,0.9)}
+.tck{width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(0,0,0,0.18);
+  flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:0.2s;background:rgba(255,255,255,0.8);font-size:0.72rem}
+.tck.done{background:var(--mint-d);border-color:var(--mint-d);color:#fff}
+.tn{flex:1;font-size:0.83rem;font-weight:700}.tn.done{text-decoration:line-through;color:var(--light)}
+.tm{font-size:0.67rem;color:rgba(0,0,0,0.38);margin-left:1px}
+.tdl{background:none;border:none;color:rgba(0,0,0,0.2);cursor:pointer;font-size:0.85rem;padding:2px 4px}
+.hg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ht{background:rgba(255,255,255,0.65);border-radius:12px;padding:9px 11px;
+  border:1.5px solid rgba(255,255,255,0.9);cursor:pointer;transition:0.2s;
+  display:flex;align-items:center;gap:7px}
+.ht.done{background:rgba(255,255,255,0.92)}
+.ht:active{transform:scale(0.96)}
+.he{font-size:1.2rem}.hi{flex:1;min-width:0}
+.hn{font-size:0.75rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hs{font-size:0.62rem;color:rgba(0,0,0,0.4)}
+.hadd{width:100%;background:rgba(255,255,255,0.45);border:2px dashed rgba(0,0,0,0.13);
+  border-radius:12px;padding:9px;font-family:'Fredoka One',cursive;font-size:0.74rem;
+  color:rgba(0,0,0,0.35);cursor:pointer;margin-top:7px}
+.ntdi{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.55);
+  border-radius:10px;padding:8px 11px;margin-bottom:5px;
+  border:1.5px dashed rgba(255,107,107,0.28)}
+.ntdx{color:#ff6b6b;font-size:0.95rem;font-weight:700;flex-shrink:0}
+.ntdt{font-size:0.82rem;color:#cc4444;text-decoration:line-through;font-weight:700;flex:1}
+.moti{background:rgba(184,222,255,0.45);border:2.5px solid var(--blue-d);
+  border-radius:14px;padding:12px 16px;font-family:'Architects Daughter',cursive;
+  font-size:0.92rem;font-weight:700;color:#3a6aaa;text-align:center;margin-bottom:12px}
+.sh{display:flex;align-items:center;gap:7px;margin-bottom:10px;margin-top:2px}
+.sh-t{font-family:'Fredoka One',cursive;font-size:1rem;letter-spacing:0.4px}
+.wb{padding:4px 12px;border-radius:4px;font-family:'Architects Daughter',cursive;
+  font-size:0.76rem;font-weight:700;letter-spacing:0.8px;display:inline-block}
+.wb-b{background:rgba(184,222,255,0.7);color:#3a6aaa}.wb-m{background:rgba(200,240,224,0.7);color:#1a7a5a}
+.wb-y{background:rgba(255,243,176,0.7);color:#7a5a00}.wb-p{background:rgba(255,214,224,0.7);color:#aa3a6a}
+.wb-l{background:rgba(232,213,255,0.7);color:#6a2aaa}
+.filter-btn.active{box-shadow:0 2px 8px rgba(0,0,0,0.15);transform:scale(1.05)}
+.gc{background:#fff;border-radius:var(--r);padding:13px;margin-bottom:9px;
+  border-left:4px solid var(--pink-d);box-shadow:var(--shadow)}
+.gc.mb{border-left-color:var(--mint-d)}.gc.yb{border-left-color:var(--yellow-d)}.gc.lb2{border-left-color:var(--lav-d)}
+.gt{font-family:'Fredoka One',cursive;font-size:0.92rem;margin-bottom:5px}
+.gpw{background:#f0f0f8;border-radius:40px;height:9px;overflow:hidden;margin:6px 0 3px}
+.gpf{height:100%;border-radius:40px;background:linear-gradient(90deg,var(--pink-d),var(--lav-d));transition:width 0.5s}
+.fg{background:linear-gradient(135deg,#ffd6e0,#e8d5ff,#c8f0e0);border-radius:22px;
+  padding:18px;text-align:center;margin-bottom:12px;box-shadow:0 7px 0 rgba(200,160,255,0.25),var(--shadow)}
+.fg-l{font-family:'Architects Daughter',cursive;font-size:0.72rem;color:var(--muted);letter-spacing:2px;margin-bottom:5px}
+.fg-t{font-family:'Fredoka One',cursive;font-size:1.25rem;line-height:1.3}
+.mood-btn{padding:6px 12px;border-radius:40px;border:2px solid rgba(0,0,0,0.08);
+  background:rgba(255,255,255,0.7);font-family:'Fredoka One',cursive;font-size:0.76rem;
+  cursor:pointer;transition:0.2s;letter-spacing:0.3px}
+.sg{background:#f8f8f8;border-radius:7px;color:var(--text)}
+.mg{background:rgba(255,243,176,0.9);border-color:var(--yellow-d);color:#7a5a00}
+.mg2{background:rgba(200,240,224,0.9);border-color:var(--mint-d);color:#1a6a4a}
+.mo{background:rgba(184,222,255,0.9);border-color:var(--blue-d);color:#2a5a8a}
+.ml{background:rgba(255,214,224,0.9);border-color:var(--pink-d);color:#aa3a6a}
+.ms{background:rgba(232,213,255,0.9);border-color:var(--lav-d);color:#5a2aaa}
+.jip{width:100%;background:rgba(255,255,255,0.7);border:2px dashed rgba(0,0,0,0.1);
+  border-radius:14px;padding:11px 13px;font-family:'Nunito',sans-serif;font-size:0.86rem;
+  color:var(--text);outline:none;resize:none;min-height:85px;line-height:1.7}
+.jip:focus{border-color:var(--pink-d);background:#fff}
+.pc{display:inline-block;background:rgba(255,255,255,0.65);
+  border:1.5px dashed rgba(0,0,0,0.12);border-radius:40px;
+  padding:4px 11px;font-size:0.72rem;font-family:'Architects Daughter',cursive;
+  color:var(--muted);cursor:pointer;margin:2px}
+.je{background:rgba(255,255,255,0.8);border-radius:12px;padding:11px 13px;margin-bottom:7px;
+  border:1.5px solid rgba(255,255,255,0.95)}
+.je-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.je-d{font-size:0.67rem;color:var(--muted);font-family:'Architects Daughter',cursive}
+.je-tx{font-size:0.8rem;color:var(--text);line-height:1.6;white-space:pre-wrap}
+.tg{background:linear-gradient(135deg,#fff0f8,#fff8f0);border:2px solid var(--pink);
+  border-radius:var(--r);padding:14px;margin-bottom:12px}
+.tg-t{font-family:'Fredoka One',cursive;font-size:0.9rem;color:#aa3a6a;margin-bottom:3px;letter-spacing:0.4px}
+.tg-s{font-size:0.72rem;color:var(--muted);margin-bottom:11px}
+.thg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.thc{border-radius:var(--r);padding:14px;cursor:pointer;border:3px solid transparent;
+  transition:0.2s;text-align:center;box-shadow:var(--shadow)}
+.thc.sel{border-color:var(--pink-d);box-shadow:0 0 0 2px var(--pink-d)}
+.thc-t{font-family:'Fredoka One',cursive;font-size:0.84rem;margin-top:5px}
+.thdots{display:flex;gap:4px;justify-content:center;margin-bottom:3px}
+.td{width:14px;height:14px;border-radius:50%}
+.sr{display:flex;justify-content:space-between;align-items:center;
+  background:#fff;border-radius:12px;padding:11px 14px;margin-bottom:7px;box-shadow:var(--shadow)}
+.sr-l{font-family:'Fredoka One',cursive;font-size:0.86rem;letter-spacing:0.3px}
+.sr-s{font-size:0.7rem;color:var(--muted);margin-top:1px}
+.sb{padding:7px 13px;border-radius:10px;border:none;font-family:'Fredoka One',cursive;
+  font-size:0.76rem;cursor:pointer;transition:0.15s;letter-spacing:0.3px}
+.sb:active{transform:scale(0.96)}
+.sbp{background:var(--pink);color:#aa3a6a;box-shadow:0 3px 0 var(--pink-d)}
+.sbm{background:var(--mint);color:#1a6a4a;box-shadow:0 3px 0 var(--mint-d)}
+.sby{background:var(--yellow);color:#7a5a00;box-shadow:0 3px 0 var(--yellow-d)}
+.sbb{background:var(--blue);color:#2a5a8a;box-shadow:0 3px 0 var(--blue-d)}
+.sbf{width:100%;padding:12px;border-radius:14px;font-family:'Fredoka One',cursive;
+  font-size:0.9rem;cursor:pointer;border:none;transition:0.15s;letter-spacing:0.8px;
+  box-shadow:0 4px 0 rgba(0,0,0,0.1)}
+.sbf:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,0.1)}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.ts{position:absolute;inset:0;background:#e8d5ff;border-radius:24px;cursor:pointer;transition:0.3s}
+.ts:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;
+  background:#fff;border-radius:50%;transition:0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.18)}
+.toggle input:checked + .ts{background:var(--pink-d)}
+.toggle input:checked + .ts:before{transform:translateX(20px)}
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.38);z-index:300;
+  display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity 0.25s}
+.backdrop.open{opacity:1;pointer-events:all}
+.modal{background:#fff;border-radius:24px 24px 0 0;padding:18px 16px 28px;
+  width:100%;max-height:88vh;overflow-y:auto;
+  transform:translateY(40px);transition:transform 0.25s;
+  background-image:linear-gradient(rgba(180,180,210,0.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(180,180,210,0.07) 1px,transparent 1px);
+  background-size:26px 26px}
+.backdrop.open .modal{transform:translateY(0)}
+.mh{width:34px;height:4px;background:#e8d5ff;border-radius:2px;margin:0 auto 14px}
+.mt{font-family:'Fredoka One',cursive;font-size:1.1rem;margin-bottom:14px;letter-spacing:0.8px}
+.fg-group{margin-bottom:11px}
+.fg-group label{display:block;font-family:'Fredoka One',cursive;font-size:0.78rem;
+  color:var(--muted);margin-bottom:4px;letter-spacing:0.3px}
+.fg-group input,.fg-group select,.fg-group textarea{width:100%;background:#f8f4ff;
+  border:2px solid #e8d5ff;border-radius:10px;padding:9px 12px;color:var(--text);
+  font-family:'Nunito',sans-serif;font-size:0.88rem;outline:none}
+.fg-group input:focus,.fg-group select:focus,.fg-group textarea:focus{border-color:var(--lav-d);background:#fff}
+.fg-group select option{background:#fff}
+.toast{position:fixed;top:18px;left:50%;
+  transform:translateX(-50%) translateY(-80px);
+  background:#fff;border:2px solid var(--pink-d);border-radius:40px;
+  padding:9px 20px;font-family:'Fredoka One',cursive;font-size:0.84rem;
+  color:#aa3a6a;z-index:500;transition:transform 0.3s;
+  box-shadow:0 4px 18px rgba(255,173,200,0.38);white-space:nowrap;letter-spacing:0.3px}
+.toast.show{transform:translateX(-50%) translateY(0)}
+#offBanner{display:none;position:fixed;top:0;left:0;right:0;z-index:399;
+  background:var(--yellow-d);padding:6px;text-align:center;
+  font-family:'Fredoka One',cursive;font-size:0.75rem;color:#7a5a00}
+.empty{text-align:center;padding:18px;color:var(--light);font-family:'Architects Daughter',cursive;font-size:0.82rem}
+.vn{background:repeating-linear-gradient(transparent,transparent 27px,rgba(140,180,255,0.25) 28px);
+  border-radius:var(--r);padding:12px 14px;font-family:'Architects Daughter',cursive;
+  font-size:0.84rem;line-height:28px;color:var(--text);min-height:110px;
+  outline:none;width:100%;border:none;resize:none;background-color:rgba(255,255,255,0.65)}
+/* PEN CANVAS */
+#penOverlay{position:fixed;inset:0;z-index:400;display:none;flex-direction:column}
+#penOverlay.open{display:flex}
+#penCanvas{flex:1;touch-action:none;cursor:crosshair;background:rgba(253,249,245,0.96)}
+.pen-toolbar{background:#fff;border-bottom:2px dashed var(--lav);padding:10px 14px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;z-index:401}
+.pen-color{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:0.15s;flex-shrink:0}
+.pen-color.active{border-color:#333;transform:scale(1.18)}
+.pen-size{display:flex;align-items:center;gap:6px;font-family:'Fredoka One',cursive;font-size:0.75rem;color:var(--muted)}
+.pen-size input{width:70px;accent-color:var(--pink-d)}
+.pen-action{padding:6px 12px;border-radius:10px;border:none;font-family:'Fredoka One',cursive;
+  font-size:0.75rem;cursor:pointer;letter-spacing:0.3px;transition:0.15s}
+.pen-action:active{transform:scale(0.95)}
+.pen-eraser-cursor{cursor:cell}
+/* NOTES EDITABLE */
+.notes-ta{width:100%;background:transparent;border:none;outline:none;resize:none;
+  font-family:'Architects Daughter',cursive;font-size:0.68rem;color:#1a6a4a;
+  line-height:1.6;min-height:70px;text-align:center}
+/* JOURNAL EDIT */
+.je-edit-area{width:100%;background:rgba(255,255,255,0.7);border:1.5px dashed var(--lav-d);
+  border-radius:10px;padding:8px 10px;font-family:'Nunito',sans-serif;font-size:0.8rem;
+  color:var(--text);outline:none;resize:none;min-height:60px;line-height:1.6;margin-top:4px}
+.je-title-edit{width:100%;background:rgba(255,255,255,0.7);border:1.5px dashed var(--lav-d);
+  border-radius:8px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:0.82rem;
+  color:var(--lav-d);outline:none;margin-bottom:5px}
+/* FAB PEN BUTTON */
+.fab-pen{position:fixed;bottom:88px;right:16px;width:50px;height:50px;border-radius:50%;
+  background:linear-gradient(135deg,var(--pink),var(--lav));border:none;
+  box-shadow:0 4px 16px rgba(255,173,200,0.5);cursor:pointer;z-index:190;
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+  transition:transform 0.2s;animation:fabPop 0.3s ease}
+.fab-pen:active{transform:scale(0.92)}
+@keyframes fabPop{from{transform:scale(0)}to{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div id="offBanner">Offline - all data saved locally!</div>
+<header>
+  <div class="title">DAILY PLANNER</div>
+  <div class="date-row"><span class="date-lbl">DATE:</span><span class="date-val" id="dv"></span></div>
+  <div class="days" id="dr"></div>
+</header>
+
+<!-- HOME -->
+<div class="view active" id="view-home">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 2px 8px">
+    <span style="font-size:1.7rem;animation:wob 2.5s ease-in-out infinite;display:inline-block">⭐</span>
+    <span style="font-family:'Architects Daughter',cursive;font-size:0.72rem;color:var(--muted)">You are capable &amp; incredible!</span>
+    <span style="font-size:1.4rem;animation:wob 3s ease-in-out infinite;display:inline-block;animation-delay:0.6s">💙</span>
+  </div>
+  <!-- QUICK TASK -->
+  <div class="card cb" style="position:relative">
+    <span class="stk" style="top:-13px;right:16px;font-size:1.5rem">⭐</span>
+    <div class="ct lb">QUICK TASK</div>
+    <div style="display:flex;gap:7px"><input type="text" class="qi" id="qI" placeholder="Add something fast..."><button class="qb" onclick="quickAdd()">+</button></div>
+  </div>
+  <!-- TODO + NOTES -->
+  <div class="g2" style="margin-bottom:12px">
+    <div class="card cb" style="margin-bottom:0">
+      <div class="ct lb" style="font-size:0.72rem">TO DO LIST</div>
+      <div id="miniTasks"></div>
+      <button onclick="goTo('tasks',document.getElementById('n-tasks'))" style="width:100%;background:rgba(255,255,255,0.45);border:1.5px dashed #7fc0f0;border-radius:9px;padding:5px;font-family:'Fredoka One',cursive;font-size:0.66rem;color:#3a6aaa;cursor:pointer;margin-top:4px">+ more</button>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center">
+      <div style="width:100%;background:var(--mint);border-radius:50%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;box-shadow:0 5px 0 var(--mint-d),var(--shadow);position:relative">
+        <span style="position:absolute;top:-7px;right:6px;font-size:1.6rem;transform:rotate(15deg);filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.18))">📎</span>
+        <div style="font-family:'Fredoka One',cursive;font-size:0.65rem;color:#1a6a4a;margin-bottom:3px;letter-spacing:0.4px">NOTES</div>
+        <textarea class="notes-ta" id="notesTA" placeholder="tap to write..." oninput="saveNotes()" rows="4"></textarea>
+      </div>
+    </div>
+  </div>
+  <!-- HABITS -->
+  <div class="card cm" style="position:relative">
+    <span class="stk" style="top:-10px;right:12px;font-size:1.2rem;animation-delay:1s">💚</span>
+    <div class="ct lm">HABIT TRACKER</div>
+    <div class="hg" id="hg"></div>
+    <button class="hadd" onclick="openModal('habitModal')">+ Add New Habit</button>
+  </div>
+  <!-- NO-TO-DO -->
+  <div class="card cpe" style="position:relative">
+    <span class="stk" style="top:-11px;left:12px;font-size:1.3rem;animation-delay:0.8s">🌸</span>
+    <div class="ct lpe">NO-TO-DO LIST</div>
+    <div style="font-size:0.68rem;color:rgba(0,0,0,0.38);font-family:'Architects Daughter',cursive;margin-bottom:8px">Things to AVOID today</div>
+    <div id="ntdl"></div>
+    <div style="display:flex;gap:7px;margin-top:7px"><input type="text" class="qi" id="ntdI" placeholder="Something to avoid..." style="border-color:var(--peach-d)"><button class="qb qbpe" onclick="addNtd()">+</button></div>
+  </div>
+  <!-- REMINDERS -->
+  <div class="card cy" style="position:relative">
+    <span class="stk" style="bottom:-9px;right:12px;font-size:1.2rem;animation-delay:1.5s">✉️</span>
+    <div class="ct ly">REMINDERS</div>
+    <div id="remList"></div>
+    <div style="display:flex;gap:7px;margin-top:5px"><input type="text" class="qi" id="remI" placeholder="Add a reminder..." style="border-color:var(--yellow-d)"><button class="qb qby" onclick="addRem()">+</button></div>
+  </div>
+  <div class="moti" id="motiTxt">You are capable and incredible! ✨</div>
+</div>
+
+<!-- TASKS -->
+<div class="view" id="view-tasks">
+  <div class="sh"><span>📋</span><span class="sh-t">My Tasks</span></div>
+  <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:7px;margin-bottom:11px;-webkit-overflow-scrolling:touch">
+    <span class="wb wb-b filter-btn active" onclick="filterT('all',this)" style="cursor:pointer;flex-shrink:0">All</span>
+    <span class="wb wb-m filter-btn" onclick="filterT('today',this)" style="cursor:pointer;flex-shrink:0">Today</span>
+    <span class="wb wb-l filter-btn" onclick="filterT('work',this)" style="cursor:pointer;flex-shrink:0">Work</span>
+    <span class="wb wb-p filter-btn" onclick="filterT('personal',this)" style="cursor:pointer;flex-shrink:0">Personal</span>
+    <span class="wb wb-y filter-btn" onclick="filterT('health',this)" style="cursor:pointer;flex-shrink:0">Health</span>
+  </div>
+  <button class="sbf sbp" onclick="openTaskModal(null)" style="background:linear-gradient(135deg,var(--pink),var(--lav));color:#6a2aaa;margin-bottom:12px">+ New Task</button>
+  <div class="card cw"><div id="fullTasks"></div></div>
+</div>
+
+<!-- GOALS -->
+<div class="view" id="view-goals">
+  <div class="sh"><span>🎯</span><span class="sh-t">Goals &amp; Dreams</span></div>
+  <div class="fg" id="fgCard">
+    <div class="fg-l">THIS MONTH'S FOCUS</div>
+    <div class="fg-t" id="fgTxt">Tap to set your focus goal!</div>
+    <button onclick="editFocus()" style="background:rgba(255,255,255,0.6);border:none;border-radius:18px;padding:4px 13px;font-family:'Fredoka One',cursive;font-size:0.68rem;color:var(--text);cursor:pointer;margin-top:9px;letter-spacing:0.4px">Edit</button>
+  </div>
+  <div class="card cl" style="margin-bottom:12px">
+    <div class="ct ll">PROGRESS</div>
+    <div style="display:flex;justify-content:space-around;padding:6px 0" id="pRings"></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+    <div class="wb wb-p">MONTHLY GOALS</div>
+    <button class="sb sbm" onclick="openModal('goalModal')" style="font-size:0.7rem;padding:5px 11px">+ Add</button>
+  </div>
+  <div id="goalsList"></div>
+  <div class="card cy" style="margin-top:2px">
+    <div class="ct ly">VISION NOTES</div>
+    <textarea class="vn" id="vnote" placeholder="Write your vision, dreams and affirmations...&#10;&#10;I am...&#10;I will...&#10;I have..."></textarea>
+    <button class="sb sby" onclick="saveVision()" style="margin-top:8px;width:100%;padding:10px">Save Vision</button>
+  </div>
+</div>
+
+<!-- JOURNAL -->
+<div class="view" id="view-journal">
+  <div class="sh"><span>📖</span><span class="sh-t">Daily Journal</span></div>
+  <div class="card cp">
+    <div class="ct lp">TODAY'S MOOD</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap">
+      <button class="mood-btn sg" onclick="pickMood('great',this)">😄 Great</button>
+      <button class="mood-btn sg" onclick="pickMood('good',this)">🙂 Good</button>
+      <button class="mood-btn sg" onclick="pickMood('okay',this)">😐 Okay</button>
+      <button class="mood-btn sg" onclick="pickMood('low',this)">😞 Low</button>
+      <button class="mood-btn sg" onclick="pickMood('stressed',this)">😤 Stressed</button>
+    </div>
+  </div>
+  <div class="card cm">
+    <div class="ct lm">REFLECTION PROMPTS</div>
+    <div>
+      <span class="pc" onclick="usePrompt(this)">What am I grateful for?</span>
+      <span class="pc" onclick="usePrompt(this)">Today's win?</span>
+      <span class="pc" onclick="usePrompt(this)">One thing I learned?</span>
+      <span class="pc" onclick="usePrompt(this)">How did I feel?</span>
+      <span class="pc" onclick="usePrompt(this)">Tomorrow I will...</span>
+      <span class="pc" onclick="usePrompt(this)">I am proud of...</span>
+    </div>
+  </div>
+  <div class="card cl">
+    <div class="ct ll">WRITE</div>
+    <div class="fg-group" style="margin-bottom:10px"><input type="text" id="jTit" placeholder="Entry title..." style="background:rgba(255,255,255,0.7);border-color:var(--lav-d)"></div>
+    <textarea class="jip" id="jTxt" placeholder="Pour your heart out..."></textarea>
+    <button class="sbf" style="background:linear-gradient(135deg,var(--lav),var(--pink));color:#6a2aaa;margin-top:9px" onclick="saveJournal()">Save Entry ✨</button>
+  </div>
+  <div class="sh" style="margin-top:4px"><span>📜</span><span class="sh-t">Past Entries</span></div>
+  <div id="jEntries"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="view" id="view-settings">
+  <div class="sh"><span>⚙️</span><span class="sh-t">Settings</span></div>
+  <!-- THEME -->
+  <div class="card cw">
+    <div class="ct lp" style="margin-bottom:12px">THEME</div>
+    <div class="thg">
+      <div class="thc sel" style="background:linear-gradient(135deg,#ffd6e0,#c8f0e0,#b8deff)" onclick="setTheme('kawaii',this)">
+        <div class="thdots"><div class="td" style="background:#ffadc8"></div><div class="td" style="background:#8edfc0"></div><div class="td" style="background:#7fc0f0"></div></div>
+        <div class="thc-t">Kawaii</div><div style="font-size:0.6rem;color:var(--muted)">Cute &amp; playful</div>
+      </div>
+      <div class="thc" style="background:linear-gradient(135deg,#f8f8f8,#f0f0f0)" onclick="setTheme('minimal',this)">
+        <div class="thdots"><div class="td" style="background:#333"></div><div class="td" style="background:#888"></div><div class="td" style="background:#ddd"></div></div>
+        <div class="thc-t">Minimal</div><div style="font-size:0.6rem;color:var(--muted)">Clean &amp; focused</div>
+      </div>
+      <div class="thc" style="background:linear-gradient(135deg,#ffe4f0,#f0e4ff,#e4f0ff)" onclick="setTheme('pastel',this)">
+        <div class="thdots"><div class="td" style="background:#ffb3d9"></div><div class="td" style="background:#d9b3ff"></div><div class="td" style="background:#b3d9ff"></div></div>
+        <div class="thc-t">Pastel</div><div style="font-size:0.6rem;color:var(--muted)">Soft &amp; dreamy</div>
+      </div>
+      <div class="thc" style="background:linear-gradient(135deg,#f5e6c8,#e8d4a8)" onclick="setTheme('vintage',this)">
+        <div class="thdots"><div class="td" style="background:#8a6a30"></div><div class="td" style="background:#c09840"></div><div class="td" style="background:#e8c870"></div></div>
+        <div class="thc-t">Vintage</div><div style="font-size:0.6rem;color:var(--muted)">Warm &amp; classic</div>
+      </div>
+    </div>
+  </div>
+  <!-- FIREBASE -->
+  <div class="tg">
+    <div class="tg-t">🔥 Cloud Sync</div>
+    <div class="tg-s">Auto-saves to Firebase. Survives uninstall!</div>
+    <div id="fbOut">
+      <button id="fbSIBtn" style="width:100%;padding:11px;border-radius:12px;border:none;background:#fff;color:#333;font-family:'Fredoka One',cursive;font-size:0.84rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 2px 8px rgba(0,0,0,0.09);letter-spacing:0.4px">
+        <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v8.51h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.14z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/></svg>
+        Sign in with Google
+      </button>
+    </div>
+    <div id="fbIn" style="display:none">
+      <div style="background:rgba(200,240,224,0.45);border-radius:10px;padding:9px 12px;margin-bottom:9px;display:flex;align-items:center;gap:7px">
+        <span>✅</span><div><div style="font-family:'Fredoka One',cursive;font-size:0.78rem;color:#1a6a4a">Auto-sync active</div><div style="font-size:0.67rem;color:var(--muted)" id="fbEmail"></div></div>
+        <div id="fbSS" style="margin-left:auto;font-size:0.65rem;color:var(--muted)">Synced</div>
+      </div>
+      <div style="display:flex;gap:7px">
+        <button id="fbSyncBtn" class="sb sbp" style="flex:1;padding:9px">Sync</button>
+        <button id="fbResBtn" class="sb sby" style="flex:1;padding:9px">Restore</button>
+        <button id="fbSOBtn" class="sb" style="flex:1;padding:9px;background:#fff0f0;color:#cc4444">Sign Out</button>
+      </div>
+    </div>
+  </div>
+  <!-- BACKUP -->
+  <div class="card cw">
+    <div class="ct lb">BACKUP</div>
+    <div style="display:flex;gap:7px;margin-bottom:7px">
+      <button id="expBtn" class="sb sbm" style="flex:1;padding:10px">Export JSON</button>
+      <button id="impBtn" class="sb sby" style="flex:1;padding:10px">Import JSON</button>
+    </div>
+    <div class="g2">
+      <button id="csvT" class="sb sbb" style="padding:9px">Tasks CSV</button>
+      <button id="csvG" class="sb sbp" style="padding:9px">Goals CSV</button>
+      <button id="csvJ" class="sb" style="padding:9px;background:var(--lav);color:#5a2aaa">Journal CSV</button>
+      <button id="csvH" class="sb sbm" style="padding:9px">Habits CSV</button>
+    </div>
+    <input type="file" id="impFile" accept=".json" style="display:none">
+  </div>
+  <!-- DATA SUMMARY -->
+  <div class="card cm">
+    <div class="ct lm">YOUR DATA</div>
+    <div class="g2">
+      <div style="background:rgba(255,255,255,0.65);border-radius:10px;padding:9px 12px;text-align:center"><div style="font-family:'Fredoka One',cursive;font-size:1.35rem" id="s-tasks">0</div><div style="font-size:0.65rem;color:var(--muted)">Tasks</div></div>
+      <div style="background:rgba(255,255,255,0.65);border-radius:10px;padding:9px 12px;text-align:center"><div style="font-family:'Fredoka One',cursive;font-size:1.35rem" id="s-habits">0</div><div style="font-size:0.65rem;color:var(--muted)">Habits</div></div>
+      <div style="background:rgba(255,255,255,0.65);border-radius:10px;padding:9px 12px;text-align:center"><div style="font-family:'Fredoka One',cursive;font-size:1.35rem" id="s-goals">0</div><div style="font-size:0.65rem;color:var(--muted)">Goals</div></div>
+      <div style="background:rgba(255,255,255,0.65);border-radius:10px;padding:9px 12px;text-align:center"><div style="font-family:'Fredoka One',cursive;font-size:1.35rem" id="s-journal">0</div><div style="font-size:0.65rem;color:var(--muted)">Journals</div></div>
+    </div>
+  </div>
+  <!-- NOTIFICATIONS -->
+  <div class="card cy">
+    <div class="ct ly">NOTIFICATIONS</div>
+    <div id="nfSt" style="background:rgba(255,255,255,0.55);border-radius:9px;padding:8px 12px;font-size:0.78rem;color:var(--muted);margin-bottom:9px">Checking...</div>
+    <button id="nfBtn" class="sbf sby" style="margin-bottom:9px">Enable Notifications</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px dashed rgba(0,0,0,0.08)"><span style="font-family:'Fredoka One',cursive;font-size:0.78rem">15 min before</span><label class="toggle"><input type="checkbox" id="t15" checked><span class="ts"></span></label></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px dashed rgba(0,0,0,0.08)"><span style="font-family:'Fredoka One',cursive;font-size:0.78rem">At task time</span><label class="toggle"><input type="checkbox" id="tOt" checked><span class="ts"></span></label></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px dashed rgba(0,0,0,0.08)"><span style="font-family:'Fredoka One',cursive;font-size:0.78rem">Morning summary</span><label class="toggle"><input type="checkbox" id="tMo"><span class="ts"></span></label></div>
+  </div>
+  <!-- DANGER -->
+  <div class="card cw" style="border:2px dashed var(--pink-d)">
+    <div style="font-family:'Fredoka One',cursive;font-size:0.86rem;color:#cc3366;margin-bottom:5px">⚠️ Danger Zone</div>
+    <button id="clrBtn" style="width:100%;padding:11px;border-radius:12px;border:2px solid var(--pink-d);background:transparent;color:#cc3366;font-family:'Fredoka One',cursive;font-size:0.82rem;cursor:pointer;letter-spacing:0.4px">Clear All Data</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <button class="ni active" id="n-home" onclick="goTo('home',this)"><span class="ni-ico">🏠</span>Home</button>
+  <button class="ni" id="n-tasks" onclick="goTo('tasks',this)"><span class="ni-ico">✅</span>Tasks</button>
+  <button class="ni" id="n-goals" onclick="goTo('goals',this)"><span class="ni-ico">🎯</span>Goals</button>
+  <button class="ni" id="n-journal" onclick="goTo('journal',this)"><span class="ni-ico">📖</span>Journal</button>
+  <button class="ni" id="n-settings" onclick="goTo('settings',this)"><span class="ni-ico">⚙️</span>Settings</button>
+</nav>
+
+<!-- TASK MODAL -->
+<div class="backdrop" id="taskModal">
+  <div class="modal">
+    <div class="mh"></div><div class="mt" id="tMT">New Task</div>
+    <div class="fg-group"><label>Task Name</label><input type="text" id="f-tN" placeholder="What needs to be done?"></div>
+    <div class="g2">
+      <div class="fg-group"><label>Category</label><select id="f-tC"><option value="work">Work</option><option value="personal">Personal</option><option value="health">Health</option><option value="study">Study</option><option value="other">Other</option></select></div>
+      <div class="fg-group"><label>Priority</label><select id="f-tP"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select></div>
+    </div>
+    <div class="g2">
+      <div class="fg-group"><label>Date</label><input type="date" id="f-tD"></div>
+      <div class="fg-group"><label>Time</label><input type="time" id="f-tTi"></div>
+    </div>
+    <div class="fg-group"><label>Notes</label><textarea id="f-tNo" placeholder="Any details..." style="height:55px"></textarea></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;background:#fff8ff;border:1.5px dashed var(--lav);border-radius:11px;padding:10px 13px;margin-bottom:11px">
+      <div><div style="font-family:'Fredoka One',cursive;font-size:0.8rem">Remind me</div><div style="font-size:0.67rem;color:var(--muted)">Notify when task time arrives</div></div>
+      <label class="toggle"><input type="checkbox" id="f-tNo2" checked><span class="ts"></span></label>
+    </div>
+    <button class="sbf sbp" id="tSvBtn" onclick="saveTask()">Add Task</button>
+    <button class="sbf sby" style="margin-top:7px" onclick="closeModal('taskModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- HABIT MODAL -->
+<div class="backdrop" id="habitModal">
+  <div class="modal">
+    <div class="mh"></div><div class="mt">New Habit</div>
+    <div class="fg-group"><label>Habit Name</label><input type="text" id="f-hN" placeholder="e.g. Morning walk"></div>
+    <div class="g2">
+      <div class="fg-group"><label>Emoji</label><input type="text" id="f-hE" placeholder="🔥" maxlength="4"></div>
+      <div class="fg-group"><label>Category</label><select id="f-hC"><option>Health</option><option>Mindset</option><option>Fitness</option><option>Learning</option><option>Business</option><option>Self-Care</option></select></div>
+    </div>
+    <button class="sbf sbm" onclick="saveHabit()">Add Habit</button>
+    <button class="sbf sby" style="margin-top:7px" onclick="closeModal('habitModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- GOAL MODAL -->
+<div class="backdrop" id="goalModal">
+  <div class="modal">
+    <div class="mh"></div><div class="mt" id="gMT">New Goal</div>
+    <div class="fg-group"><label>Goal Title</label><input type="text" id="f-gT" placeholder="What do you want to achieve?"></div>
+    <div class="fg-group"><label>Description</label><textarea id="f-gD" placeholder="Why does this matter?" style="height:55px"></textarea></div>
+    <div class="g2">
+      <div class="fg-group"><label>Deadline</label><input type="date" id="f-gDl"></div>
+      <div class="fg-group"><label>Category</label><select id="f-gC"><option>Business</option><option>Personal</option><option>Health</option><option>Finance</option><option>Learning</option></select></div>
+    </div>
+    <button class="sbf" id="gSvBtn" onclick="saveGoal()" style="background:linear-gradient(135deg,var(--lav),var(--pink));color:#6a2aaa">Add Goal</button>
+    <button class="sbf sby" style="margin-top:7px" onclick="closeModal('goalModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- FOCUS MODAL -->
+<div class="backdrop" id="focusModal">
+  <div class="modal">
+    <div class="mh"></div><div class="mt">Focus Goal</div>
+    <div class="fg-group"><label>This Month I Will Focus On...</label><textarea id="f-fg" placeholder="e.g. Build my morning routine" style="height:80px"></textarea></div>
+    <button class="sbf sbp" onclick="saveFocus()">Save Focus Goal</button>
+    <button class="sbf sby" style="margin-top:7px" onclick="closeModal('focusModal')">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FAB PEN BUTTON -->
+<button class="fab-pen" id="fabPen" onclick="openPen()" title="Draw / Annotate">✏️</button>
+
+<!-- PEN OVERLAY -->
+<div id="penOverlay">
+  <div class="pen-toolbar">
+    <div style="font-family:'Fredoka One',cursive;font-size:0.82rem;color:var(--muted);margin-right:4px">✏️ Draw</div>
+    <!-- Colors -->
+    <div class="pen-color active" id="pc-black" style="background:#2d2d2d" onclick="setPenColor('#2d2d2d',this)"></div>
+    <div class="pen-color" id="pc-pink" style="background:#ff6b9d" onclick="setPenColor('#ff6b9d',this)"></div>
+    <div class="pen-color" id="pc-purple" style="background:#9b6bff" onclick="setPenColor('#9b6bff',this)"></div>
+    <div class="pen-color" id="pc-blue" style="background:#4da6ff" onclick="setPenColor('#4da6ff',this)"></div>
+    <div class="pen-color" id="pc-green" style="background:#4dcc99" onclick="setPenColor('#4dcc99',this)"></div>
+    <div class="pen-color" id="pc-yellow" style="background:#ffd93d" onclick="setPenColor('#ffd93d',this)"></div>
+    <div class="pen-color" id="pc-red" style="background:#ff4757" onclick="setPenColor('#ff4757',this)"></div>
+    <!-- Size -->
+    <div class="pen-size">
+      <span>Size</span>
+      <input type="range" id="penSize" min="1" max="30" value="4" oninput="penSz=parseInt(this.value)">
+    </div>
+    <!-- Actions -->
+    <button class="pen-action" style="background:var(--yellow);color:#7a5a00" onclick="toggleEraser(this)">⬜ Eraser</button>
+    <button class="pen-action" style="background:var(--lav);color:#5a2aaa" onclick="undoStroke()">↩️ Undo</button>
+    <button class="pen-action" style="background:#ffe0e0;color:#cc3333" onclick="clearCanvas()">🗑️ Clear</button>
+    <button class="pen-action" style="background:var(--mint);color:#1a6a4a" onclick="saveDrawing()">💾 Save PNG</button>
+    <button class="pen-action" style="background:var(--pink);color:#aa3a6a;margin-left:auto" onclick="closePen()">✕ Close</button>
+  </div>
+  <canvas id="penCanvas"></canvas>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+var DB={get:function(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+var now=new Date();
+var td=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+var tasks=DB.get('p6_tasks')||[];
+var habits=DB.get('p6_habits')||[];
+var goals=DB.get('p6_goals')||[];
+var journal=DB.get('p6_journal')||[];
+var reminders=DB.get('p6_reminders')||[];
+var notodos=DB.get('p6_notodos')||[];
+var streak=DB.get('p6_streak')||{count:0,last:''};
+var focusGoal=DB.get('p6_focus')||'';
+var vision=DB.get('p6_vision')||'';
+var curFilter='all';
+var editTId=null;
+var editGId=null;
+var curMood='';
+var fbST=null;
+var sNotifs=[];
+var nSet=DB.get('p6_notif')||{m15:true,ot:true,mo:false};
+var MOTIS=['You are capable and incredible!','Small steps every day!','Progress over perfection!','You got this! Keep going!','Believe in yourself!','Today is a fresh start!','You are doing amazing!'];
+var GCOLS=['','mb','yb','lb2'];
+document.getElementById('dv').textContent=now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+document.getElementById('motiTxt').textContent=MOTIS[now.getDay()%MOTIS.length]+' ✨';
+(function(){var dn=['SUN','MON','TUE','WED','THU','FRI','SAT'],dc=['d0','d1','d2','d3','d4','d5','d6'];var r=document.getElementById('dr');dn.forEach(function(d,i){var b=document.createElement('div');b.className='day '+dc[i]+(i===now.getDay()?' today':'');b.textContent=d;r.appendChild(b);});})();
+(function(){var vn=document.getElementById('notesTA');if(vn){vn.value=DB.get('p6_notes')||'';}})();
+function saveNotes(){DB.set('p6_notes',document.getElementById('notesTA').value);fbDeb();}
+function goTo(id,btn){document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('active');});document.getElementById('view-'+id).classList.add('active');btn.classList.add('active');if(id==='settings')renderSettings();if(id==='goals')renderGoals();}
+var toastT;function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2500);}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function saveAll(){DB.set('p6_tasks',tasks);DB.set('p6_habits',habits);DB.set('p6_goals',goals);DB.set('p6_journal',journal);DB.set('p6_reminders',reminders);DB.set('p6_notodos',notodos);DB.set('p6_streak',streak);DB.set('p6_lastSave',Date.now());fbDeb();}
+function renderAll(){renderMini();renderFull();renderHabits();renderRems();renderNtd();renderJournal();}
+function quickAdd(){var i=document.getElementById('qI'),n=i.value.trim();if(!n)return;tasks.push({id:Date.now(),name:n,category:'work',priority:'medium',date:td,time:'',notes:'',done:false,notify:true});i.value='';saveAll();renderMini();renderFull();schedNotifs();toast('Task added! ✨');}
+document.getElementById('qI').addEventListener('keydown',function(e){if(e.key==='Enter')quickAdd();});
+function renderMini(){var list=tasks.filter(function(t){return t.date===td;}).slice(0,5);var h='';if(!list.length){h='<div style="font-size:0.68rem;color:rgba(0,0,0,0.3);font-family:Architects Daughter,cursive;padding:3px">No tasks today!</div>';}else{list.forEach(function(t){h+='<div class="tl"><div class="tck '+(t.done?'done':'')+'" onclick="toggleTask('+t.id+')">'+(t.done?'✓':'')+'</div><span class="tn '+(t.done?'done':'')+'" style="font-size:0.73rem">'+esc(t.name)+'</span></div>';});}document.getElementById('miniTasks').innerHTML=h;}
+function openTaskModal(id){editTId=id||null;if(editTId){var t=tasks.filter(function(x){return x.id===editTId;})[0];if(!t)return;document.getElementById('tMT').textContent='Edit Task';document.getElementById('tSvBtn').textContent='Save Changes';document.getElementById('f-tN').value=t.name;document.getElementById('f-tC').value=t.category;document.getElementById('f-tP').value=t.priority;document.getElementById('f-tD').value=t.date||'';document.getElementById('f-tTi').value=t.time||'';document.getElementById('f-tNo').value=t.notes||'';document.getElementById('f-tNo2').checked=t.notify!==false;}else{document.getElementById('tMT').textContent='New Task';document.getElementById('tSvBtn').textContent='Add Task';document.getElementById('f-tN').value='';document.getElementById('f-tC').value='work';document.getElementById('f-tP').value='medium';document.getElementById('f-tD').value=td;document.getElementById('f-tTi').value='';document.getElementById('f-tNo').value='';document.getElementById('f-tNo2').checked=true;}openModal('taskModal');}
+function saveTask(){var n=document.getElementById('f-tN').value.trim();if(!n){toast('Task name required!');return;}var d={name:n,category:document.getElementById('f-tC').value,priority:document.getElementById('f-tP').value,date:document.getElementById('f-tD').value||td,time:document.getElementById('f-tTi').value,notes:document.getElementById('f-tNo').value,notify:document.getElementById('f-tNo2').checked};if(editTId){tasks=tasks.map(function(t){return t.id===editTId?Object.assign({},t,d):t;});toast('Updated! ✨');}else{tasks.push(Object.assign({id:Date.now(),done:false},d));toast('Task added! ✨');}saveAll();closeModal('taskModal');renderMini();renderFull();schedNotifs();}
+function toggleTask(id){tasks=tasks.map(function(t){return t.id===id?Object.assign({},t,{done:!t.done}):t;});saveAll();checkStreak();renderMini();renderFull();}
+function delTask(id){tasks=tasks.filter(function(t){return t.id!==id;});saveAll();renderMini();renderFull();schedNotifs();toast('Deleted');}
+function filterT(f,btn){curFilter=f;document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');renderFull();}
+var PE={high:'🔴',medium:'🟡',low:'🟢'},CE={work:'💼',personal:'🏠',health:'💪',study:'📚',other:'⭐'};
+function renderFull(){var list=tasks;if(curFilter==='today')list=tasks.filter(function(t){return t.date===td;});else if(curFilter!=='all')list=tasks.filter(function(t){return t.category===curFilter;});var h='';if(!list.length){h='<div class="empty">No tasks here!<br>Add your first one! 🌸</div>';}else{list.forEach(function(t){h+='<div class="tl"><div class="tck '+(t.done?'done':'')+'" onclick="toggleTask('+t.id+')">'+(t.done?'✓':'')+'</div><div style="flex:1;min-width:0"><div class="tn '+(t.done?'done':'')+'">'+(CE[t.category]||'⭐')+' '+esc(t.name)+'</div><div class="tm">'+(PE[t.priority]||'')+' '+(t.date?t.date:'')+(t.time?' '+t.time:'')+'</div></div><button class="tdl" onclick="openTaskModal('+t.id+')">✏️</button><button class="tdl" onclick="delTask('+t.id+')">🗑️</button></div>';});}document.getElementById('fullTasks').innerHTML=h;}
+function checkStreak(){var ok=tasks.some(function(t){return t.date===td&&t.done;});if(ok){var y=new Date(now);y.setDate(y.getDate()-1);var ys=y.getFullYear()+'-'+String(y.getMonth()+1).padStart(2,'0')+'-'+String(y.getDate()).padStart(2,'0');if(streak.last===ys||streak.last===td){if(streak.last!==td){streak.count++;streak.last=td;}}else{streak={count:1,last:td};}DB.set('p6_streak',streak);}}
+function saveHabit(){var n=document.getElementById('f-hN').value.trim();if(!n){toast('Name required!');return;}habits.push({id:Date.now(),name:n,emoji:document.getElementById('f-hE').value||'🔥',category:document.getElementById('f-hC').value,streak:0,days:{}});saveAll();closeModal('habitModal');renderHabits();toast('Habit added! 🌱');}
+function toggleHabit(id){habits=habits.map(function(h){if(h.id!==id)return h;var days=Object.assign({},h.days||{});if(days[td]){delete days[td];h.streak=Math.max(0,(h.streak||0)-1);}else{days[td]=true;h.streak=(h.streak||0)+1;}return Object.assign({},h,{days:days});});saveAll();renderHabits();}
+function delHabit(id){habits=habits.filter(function(h){return h.id!==id;});saveAll();renderHabits();toast('Removed');}
+function renderHabits(){var h='';if(!habits.length){h='<div style="grid-column:1/-1"><div class="empty">No habits!<br>Build your streak! 🌸</div></div>';}else{habits.forEach(function(hb){var done=hb.days&&hb.days[td];h+='<div class="ht '+(done?'done':'')+'" onclick="toggleHabit('+hb.id+')" oncontextmenu="event.preventDefault();delHabit('+hb.id+')"><span class="he">'+(hb.emoji||'🔥')+'</span><div class="hi"><div class="hn">'+esc(hb.name)+'</div><div class="hs">'+(hb.streak||0)+' streak</div></div><span>'+(done?'✅':'⭕')+'</span></div>';});}document.getElementById('hg').innerHTML=h;}
+function addRem(){var i=document.getElementById('remI'),t=i.value.trim();if(!t)return;reminders.push({id:Date.now(),text:t,date:td});i.value='';saveAll();renderRems();toast('Reminder added! 📌');}
+document.getElementById('remI').addEventListener('keydown',function(e){if(e.key==='Enter')addRem();});
+function delRem(id){reminders=reminders.filter(function(r){return r.id!==id;});saveAll();renderRems();}
+function renderRems(){var list=reminders.filter(function(r){return r.date===td;});var h='';if(!list.length){h='<div style="font-size:0.7rem;color:rgba(0,0,0,0.3);font-family:Architects Daughter,cursive;padding:3px">No reminders!</div>';}else{list.forEach(function(r){h+='<div class="tl" style="border-color:rgba(255,243,176,0.7)"><span style="font-size:0.85rem">📌</span><span style="flex:1;font-size:0.8rem;font-weight:700">'+esc(r.text)+'</span><button class="tdl" onclick="delRem('+r.id+')">🗑️</button></div>';});}document.getElementById('remList').innerHTML=h;}
+function addNtd(){var i=document.getElementById('ntdI'),t=i.value.trim();if(!t)return;notodos.push({id:Date.now(),text:t,date:td});i.value='';saveAll();renderNtd();toast('Added to avoid list!');}
+document.getElementById('ntdI').addEventListener('keydown',function(e){if(e.key==='Enter')addNtd();});
+function delNtd(id){notodos=notodos.filter(function(n){return n.id!==id;});saveAll();renderNtd();}
+function renderNtd(){var list=notodos.filter(function(n){return n.date===td;});var h='';if(!list.length){h='<div style="font-size:0.7rem;color:rgba(0,0,0,0.3);font-family:Architects Daughter,cursive;padding:3px">Nothing to avoid!</div>';}else{list.forEach(function(n){h+='<div class="ntdi"><span class="ntdx">✗</span><span class="ntdt">'+esc(n.text)+'</span><button class="tdl" onclick="delNtd('+n.id+')">🗑️</button></div>';});}document.getElementById('ntdl').innerHTML=h;}
+function openGoalModal(id){editGId=id||null;if(editGId){var g=goals.filter(function(x){return x.id===editGId;})[0];if(!g)return;document.getElementById('gMT').textContent='Edit Goal';document.getElementById('gSvBtn').textContent='Save Changes';document.getElementById('f-gT').value=g.title;document.getElementById('f-gD').value=g.desc||'';document.getElementById('f-gDl').value=g.deadline||'';document.getElementById('f-gC').value=g.category;}else{document.getElementById('gMT').textContent='New Goal';document.getElementById('gSvBtn').textContent='Add Goal';document.getElementById('f-gT').value='';document.getElementById('f-gD').value='';document.getElementById('f-gDl').value='';document.getElementById('f-gC').value='Business';}openModal('goalModal');}
+function saveGoal(){var t=document.getElementById('f-gT').value.trim();if(!t){toast('Title required!');return;}var d={title:t,desc:document.getElementById('f-gD').value,deadline:document.getElementById('f-gDl').value,category:document.getElementById('f-gC').value};if(editGId){goals=goals.map(function(g){return g.id===editGId?Object.assign({},g,d):g;});toast('Updated! 🎯');}else{goals.push(Object.assign({id:Date.now(),progress:0},d));toast('Goal added! 🎯');}saveAll();closeModal('goalModal');renderGoals();}
+function updGP(id,val){goals=goals.map(function(g){return g.id===id?Object.assign({},g,{progress:parseInt(val)}):g;});saveAll();var e=document.getElementById('gp-'+id),f=document.getElementById('gpf-'+id);if(e)e.textContent=val+'%';if(f)f.style.width=val+'%';}
+function delGoal(id){goals=goals.filter(function(g){return g.id!==id;});saveAll();renderGoals();toast('Goal deleted');}
+function editFocus(){document.getElementById('f-fg').value=focusGoal;openModal('focusModal');}
+function saveFocus(){focusGoal=document.getElementById('f-fg').value.trim();DB.set('p6_focus',focusGoal);document.getElementById('fgTxt').textContent=focusGoal||'Tap to set your focus goal!';closeModal('focusModal');toast('Focus saved! ⭐');}
+function mkRing(lbl,val,pct,col){var r=34,c=2*Math.PI*r,off=c*(1-pct/100);return '<div style="display:flex;flex-direction:column;align-items:center;gap:3px"><svg width="78" height="78" viewBox="0 0 80 80"><circle cx="40" cy="40" r="'+r+'" fill="none" stroke="#f0ecf8" stroke-width="7"/><circle cx="40" cy="40" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 40 40)"/><text x="40" y="44" text-anchor="middle" font-family="Fredoka One,cursive" font-size="14" fill="'+col+'">'+val+'</text></svg><div style="font-family:Architects Daughter,cursive;font-size:0.62rem;color:var(--muted);text-align:center">'+lbl+'</div></div>';}
+function renderGoals(){document.getElementById('fgTxt').textContent=focusGoal||'Tap to set your focus goal!';var tot=goals.length,done=goals.filter(function(g){return g.progress>=100;}).length,avg=Math.round(goals.reduce(function(s,g){return s+(g.progress||0);},0)/(tot||1));document.getElementById('pRings').innerHTML=mkRing('Goals',done+'/'+tot,tot?Math.round(done/tot*100):0,'#c4a8ff')+mkRing('Avg',avg+'%',avg,'#8edfc0')+mkRing('Streak',(streak.count||0)+'d',Math.min(100,(streak.count||0)*5),'#ffadc8');var h='';if(!goals.length){h='<div class="empty card cw">No goals yet!<br>Dream big! 🎯</div>';}else{goals.forEach(function(g,i){var dl='';if(g.deadline){var diff=Math.ceil((new Date(g.deadline)-now)/86400000);dl=diff>0?diff+' days left':'Due today!';}h+='<div class="gc '+GCOLS[i%GCOLS.length]+'"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="gt">'+esc(g.title)+'</div><div style="display:flex;gap:4px"><button class="tdl" onclick="openGoalModal('+g.id+')">✏️</button><button class="tdl" onclick="delGoal('+g.id+')">🗑️</button></div></div>';if(g.desc)h+='<div style="font-size:0.72rem;color:var(--muted);margin-bottom:3px">'+esc(g.desc)+'</div>';if(dl)h+='<div class="wb wb-m" style="font-size:0.64rem;margin-bottom:5px">'+dl+'</div>';h+='<div style="display:flex;align-items:center;gap:7px"><div style="flex:1"><div class="gpw"><div class="gpf" id="gpf-'+g.id+'" style="width:'+(g.progress||0)+'%"></div></div></div><span style="font-family:Fredoka One,cursive;font-size:0.82rem;color:var(--lav-d)" id="gp-'+g.id+'">'+(g.progress||0)+'%</span></div>';h+='<input type="range" min="0" max="100" value="'+(g.progress||0)+'" style="width:100%;margin-top:5px;accent-color:var(--lav-d)" oninput="updGP('+g.id+',this.value)"></div>';});}document.getElementById('goalsList').innerHTML=h;var vn=document.getElementById('vnote');if(vn&&!vn.value)vn.value=vision;}
+function saveVision(){vision=document.getElementById('vnote').value;DB.set('p6_vision',vision);toast('Vision saved! 🌟');fbDeb();}
+function pickMood(m,btn){curMood=m;document.querySelectorAll('.mood-btn').forEach(function(b){b.className='mood-btn sg';});var mc={great:'mg',good:'mg2',okay:'mo',low:'ml',stressed:'ms'};btn.className='mood-btn '+(mc[m]||'sg');}
+function usePrompt(el){var t=document.getElementById('jTxt');t.value=(t.value.trim()?t.value.trim()+'\n\n':'')+el.textContent+'\n';t.focus();}
+function saveJournal(){var txt=document.getElementById('jTxt').value.trim();if(!txt){toast('Write something first!');return;}journal.unshift({id:Date.now(),date:td,time:now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),mood:curMood,title:document.getElementById('jTit').value.trim(),text:txt});saveAll();document.getElementById('jTit').value='';document.getElementById('jTxt').value='';curMood='';document.querySelectorAll('.mood-btn').forEach(function(b){b.className='mood-btn sg';});renderJournal();toast('Entry saved! 💖');}
+var ME={great:'😄',good:'🙂',okay:'😐',low:'😞',stressed:'😤'};
+function delJournal(id){if(!confirm('Delete this entry?'))return;journal=journal.filter(function(j){return j.id!==id;});saveAll();renderJournal();}
+function editJournal(id){
+  var entry=journal.filter(function(j){return j.id===id;})[0];
+  if(!entry)return;
+  var card=document.getElementById('je-'+id);
+  if(!card)return;
+  var isEditing=card.getAttribute('data-editing')==='1';
+  if(isEditing){
+    // SAVE edits
+    var newTitle=document.getElementById('jet-'+id);
+    var newText=document.getElementById('jea-'+id);
+    if(newTitle)entry.title=newTitle.value.trim();
+    if(newText)entry.text=newText.value.trim();
+    journal=journal.map(function(j){return j.id===id?entry:j;});
+    saveAll();
+    renderJournal();
+    toast('Entry updated! ✨');
+  } else {
+    // ENTER edit mode
+    card.setAttribute('data-editing','1');
+    var titleEl=document.getElementById('jtitle-'+id);
+    var textEl=document.getElementById('jtext-'+id);
+    var editBtn=document.getElementById('jedit-btn-'+id);
+    if(titleEl){titleEl.outerHTML='<input class="je-title-edit" id="jet-'+id+'" value="'+esc(entry.title||'')+'">';}
+    if(textEl){textEl.outerHTML='<textarea class="je-edit-area" id="jea-'+id+'" rows="5">'+esc(entry.text)+'</textarea>';}
+    if(editBtn){editBtn.textContent='💾 Save';editBtn.style.background='var(--mint)';editBtn.style.color='#1a6a4a';}
+  }
+}
+function renderJournal(){
+  var h='';
+  if(!journal.length){
+    h='<div class="empty card cw">No entries yet!<br>Start writing! 📖</div>';
+  } else {
+    journal.slice(0,20).forEach(function(j){
+      h+='<div class="je" id="je-'+j.id+'">';
+      h+='<div class="je-h">';
+      h+='<span class="je-d">'+j.date+(j.time?' '+j.time:'')+'</span>';
+      h+='<div style="display:flex;align-items:center;gap:5px">';
+      if(j.mood)h+='<span>'+(ME[j.mood]||'')+'</span>';
+      h+='<button class="tdl" id="jedit-btn-'+j.id+'" onclick="editJournal('+j.id+')" style="font-size:0.78rem;background:rgba(232,213,255,0.5);border-radius:6px;padding:2px 7px;color:#5a2aaa">✏️ Edit</button>';
+      h+='<button class="tdl" onclick="delJournal('+j.id+')">🗑️</button>';
+      h+='</div></div>';
+      h+='<div id="jtitle-'+j.id+'" style="font-family:\'Fredoka One\',cursive;font-size:0.85rem;margin-bottom:3px;color:var(--lav-d)">'+(j.title?esc(j.title):'')+'</div>';
+      h+='<div class="je-tx" id="jtext-'+j.id+'">'+esc(j.text)+'</div>';
+      h+='</div>';
+    });
+  }
+  document.getElementById('jEntries').innerHTML=h;
+}
+function renderSettings(){var st=document.getElementById('s-tasks');if(!st)return;document.getElementById('s-tasks').textContent=tasks.length;document.getElementById('s-habits').textContent=habits.length;document.getElementById('s-goals').textContent=goals.length;document.getElementById('s-journal').textContent=journal.length;updNfUI();}
+function setTheme(t,card){document.querySelectorAll('.thc').forEach(function(c){c.classList.remove('sel');});card.classList.add('sel');DB.set('p6_theme',t);if(t==='minimal'){document.body.style.backgroundImage='none';document.body.style.backgroundColor='#f8f8f8';}else if(t==='pastel'){document.body.style.backgroundImage='linear-gradient(rgba(200,160,220,0.1) 1px,transparent 1px),linear-gradient(90deg,rgba(200,160,220,0.1) 1px,transparent 1px)';document.body.style.backgroundColor='#fdf4ff';}else if(t==='vintage'){document.body.style.backgroundImage='none';document.body.style.backgroundColor='#fdf6e3';}else{document.body.style.backgroundImage='linear-gradient(rgba(180,180,210,0.13) 1px,transparent 1px),linear-gradient(90deg,rgba(180,180,210,0.13) 1px,transparent 1px)';document.body.style.backgroundColor='#fdf9f5';}toast('Theme changed! 🎨');}
+document.getElementById('expBtn').addEventListener('click',function(){var d=JSON.stringify({v:6,tasks:tasks,habits:habits,goals:goals,journal:journal,reminders:reminders,notodos:notodos,streak:streak,focusGoal:focusGoal,vision:vision},null,2);var u=URL.createObjectURL(new Blob([d],{type:'application/json'}));var a=document.createElement('a');a.href=u;a.download='planner-backup-'+td+'.json';a.click();URL.revokeObjectURL(u);toast('Backup saved! 💾');});
+document.getElementById('impBtn').addEventListener('click',function(){document.getElementById('impFile').click();});
+document.getElementById('impFile').addEventListener('change',function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(!confirm('Replace all data with backup?'))return;tasks=d.tasks||[];habits=d.habits||[];goals=d.goals||[];journal=d.journal||[];reminders=d.reminders||[];notodos=d.notodos||[];streak=d.streak||{count:0,last:''};focusGoal=d.focusGoal||'';vision=d.vision||'';saveAll();renderAll();renderSettings();renderGoals();toast('Restored! 🎉');}catch(err){toast('Invalid file!');}};r.readAsText(f);e.target.value='';});
+document.getElementById('clrBtn').addEventListener('click',function(){if(!confirm('Delete ALL data?'))return;if(!confirm('Really sure?'))return;tasks=[];habits=[];goals=[];journal=[];reminders=[];notodos=[];streak={count:0,last:''};focusGoal='';vision='';['p6_tasks','p6_habits','p6_goals','p6_journal','p6_reminders','p6_notodos','p6_streak','p6_focus','p6_vision'].forEach(function(k){localStorage.removeItem(k);});renderAll();renderSettings();renderGoals();toast('All cleared');});
+function dlCSV(hd,rows,nm){var csv=[hd.map(function(h){return '"'+h+'"';}).join(',')];rows.forEach(function(r){csv.push(r.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}).join(','));});var u=URL.createObjectURL(new Blob([csv.join('\n')],{type:'text/csv'}));var a=document.createElement('a');a.href=u;a.download=nm;a.click();URL.revokeObjectURL(u);toast('CSV downloaded!');}
+document.getElementById('csvT').addEventListener('click',function(){dlCSV(['Name','Category','Priority','Date','Done'],tasks.map(function(t){return[t.name,t.category,t.priority,t.date,t.done?'Yes':'No']}),'tasks-'+td+'.csv');});
+document.getElementById('csvG').addEventListener('click',function(){dlCSV(['Title','Category','Deadline','Progress'],goals.map(function(g){return[g.title,g.category,g.deadline,g.progress||0]}),'goals-'+td+'.csv');});
+document.getElementById('csvJ').addEventListener('click',function(){dlCSV(['Date','Mood','Title','Entry'],journal.map(function(j){return[j.date,j.mood,j.title,j.text]}),'journal-'+td+'.csv');});
+document.getElementById('csvH').addEventListener('click',function(){dlCSV(['Name','Category','Streak'],habits.map(function(h){return[h.name,h.category,h.streak||0]}),'habits-'+td+'.csv');});
+function updNfUI(){var el=document.getElementById('nfSt'),btn=document.getElementById('nfBtn');if(!el)return;if(!('Notification' in window)){el.textContent='Not supported';return;}if(Notification.permission==='granted'){el.textContent='Notifications enabled ✅';el.style.color='#1a6a4a';if(btn)btn.style.display='none';}else if(Notification.permission==='denied'){el.textContent='Blocked in browser settings';el.style.color='#cc4444';}else{el.textContent='Not enabled yet';el.style.color='#7a5a00';}}
+document.getElementById('nfBtn').addEventListener('click',function(){if(!('Notification' in window)){toast('Not supported');return;}Notification.requestPermission().then(function(p){updNfUI();if(p==='granted'){new Notification('Daily Planner',{body:'You will get task reminders!'});schedNotifs();toast('Notifications on! 🔔');}});});
+document.getElementById('t15').addEventListener('change',function(){nSet.m15=this.checked;DB.set('p6_notif',nSet);schedNotifs();});
+document.getElementById('tOt').addEventListener('change',function(){nSet.ot=this.checked;DB.set('p6_notif',nSet);schedNotifs();});
+document.getElementById('tMo').addEventListener('change',function(){nSet.mo=this.checked;DB.set('p6_notif',nSet);schedNotifs();});
+function schedNotifs(){sNotifs.forEach(function(id){clearTimeout(id);});sNotifs=[];if(Notification.permission!=='granted')return;var nm=Date.now();tasks.filter(function(t){return!t.done&&t.date===td&&t.time&&t.notify!==false;}).forEach(function(t){var p=t.time.split(':'),ms=new Date(now.getFullYear(),now.getMonth(),now.getDate(),parseInt(p[0]),parseInt(p[1]),0).getTime();if(nSet.m15){var a=ms-900000;if(a>nm)sNotifs.push(setTimeout(function(){new Notification('Task in 15 min!',{body:'"'+t.name+'" at '+t.time});},a-nm));}if(nSet.ot&&ms>nm)sNotifs.push(setTimeout(function(){new Notification('Task Due!',{body:'"'+t.name+'"'});},ms-nm));});if(nSet.mo){var m=new Date(now.getFullYear(),now.getMonth(),now.getDate(),8,0,0).getTime();if(m>nm)sNotifs.push(setTimeout(function(){new Notification('Good morning!',{body:tasks.filter(function(t){return t.date===td;}).length+' tasks today!'});},m-nm));}}
+var FB_CONFIG={apiKey:"AIzaSyB3VF8ub4Xl0oQQpJU6aOhW2GqW6LP1CRA",authDomain:"climbpro-c0689.firebaseapp.com",databaseURL:"https://climbpro-c0689-default-rtdb.firebaseio.com",projectId:"climbpro-c0689",storageBucket:"climbpro-c0689.firebasestorage.app",messagingSenderId:"885415279305",appId:"1:885415279305:web:642e57eb1e2a42a646eb18"};
+// PEN CANVAS
+var penColor='#2d2d2d';
+var penSz=4;
+var penDrawing=false;
+var penEraser=false;
+var penStrokes=[];
+var currentStroke=[];
+var penCtx=null;
+var penCanvasEl=null;
+var penLX=0,penLY=0;
+
+function openPen(){
+  var overlay=document.getElementById('penOverlay');
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+  penCanvasEl=document.getElementById('penCanvas');
+  penCanvasEl.width=window.innerWidth;
+  penCanvasEl.height=window.innerHeight-document.querySelector('.pen-toolbar').offsetHeight;
+  penCtx=penCanvasEl.getContext('2d');
+  penCtx.lineCap='round';penCtx.lineJoin='round';
+  redrawCanvas();
+  // Load saved drawing
+  var saved=DB.get('p6_drawing');
+  if(saved){var img=new Image();img.onload=function(){penCtx.drawImage(img,0,0);};img.src=saved;}
+}
+
+function closePen(){
+  document.getElementById('penOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function setPenColor(col,btn){
+  penColor=col;penEraser=false;
+  document.querySelectorAll('.pen-color').forEach(function(c){c.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('penCanvas').style.cursor='crosshair';
+}
+
+function toggleEraser(btn){
+  penEraser=!penEraser;
+  btn.style.background=penEraser?'#ffadc8':'var(--yellow)';
+  btn.style.color=penEraser?'#fff':'#7a5a00';
+  btn.textContent=penEraser?'🖊️ Pen':'⬜ Eraser';
+  document.getElementById('penCanvas').style.cursor=penEraser?'cell':'crosshair';
+}
+
+function getPos(e){
+  var rect=penCanvasEl.getBoundingClientRect();
+  if(e.touches&&e.touches[0]){
+    return{x:e.touches[0].clientX-rect.left,y:e.touches[0].clientY-rect.top};
+  }
+  return{x:e.clientX-rect.left,y:e.clientY-rect.top};
+}
+
+function penStart(e){
+  e.preventDefault();
+  penDrawing=true;
+  var p=getPos(e);
+  penLX=p.x;penLY=p.y;
+  currentStroke=[{x:p.x,y:p.y}];
+  penCtx.beginPath();penCtx.moveTo(p.x,p.y);
+}
+
+function penMove(e){
+  e.preventDefault();
+  if(!penDrawing)return;
+  var p=getPos(e);
+  penCtx.beginPath();
+  penCtx.moveTo(penLX,penLY);
+  penCtx.lineTo(p.x,p.y);
+  if(penEraser){
+    penCtx.globalCompositeOperation='destination-out';
+    penCtx.strokeStyle='rgba(0,0,0,1)';
+    penCtx.lineWidth=penSz*4;
+  } else {
+    penCtx.globalCompositeOperation='source-over';
+    penCtx.strokeStyle=penColor;
+    penCtx.lineWidth=penSz;
+  }
+  penCtx.stroke();
+  currentStroke.push({x:p.x,y:p.y});
+  penLX=p.x;penLY=p.y;
+}
+
+function penEnd(e){
+  if(!penDrawing)return;
+  penDrawing=false;
+  if(currentStroke.length>0){
+    penStrokes.push({points:currentStroke,color:penEraser?null:penColor,size:penSz,eraser:penEraser});
+    currentStroke=[];
+  }
+  // Auto-save after 1s delay
+  clearTimeout(window.penSaveTimer);
+  window.penSaveTimer=setTimeout(function(){
+    try{DB.set('p6_drawing',penCanvasEl.toDataURL());}catch(e){}
+  },1000);
+}
+
+function undoStroke(){
+  if(!penStrokes.length){toast('Nothing to undo');return;}
+  penStrokes.pop();
+  redrawCanvas();
+  toast('Undone ↩️');
+}
+
+function redrawCanvas(){
+  if(!penCtx||!penCanvasEl)return;
+  penCtx.clearRect(0,0,penCanvasEl.width,penCanvasEl.height);
+  penCtx.globalCompositeOperation='source-over';
+  penStrokes.forEach(function(stroke){
+    if(!stroke.points||stroke.points.length<2)return;
+    penCtx.beginPath();
+    penCtx.moveTo(stroke.points[0].x,stroke.points[0].y);
+    for(var i=1;i<stroke.points.length;i++){penCtx.lineTo(stroke.points[i].x,stroke.points[i].y);}
+    if(stroke.eraser){penCtx.globalCompositeOperation='destination-out';penCtx.strokeStyle='rgba(0,0,0,1)';}
+    else{penCtx.globalCompositeOperation='source-over';penCtx.strokeStyle=stroke.color;}
+    penCtx.lineWidth=stroke.eraser?stroke.size*4:stroke.size;
+    penCtx.lineCap='round';penCtx.lineJoin='round';
+    penCtx.stroke();
+  });
+  penCtx.globalCompositeOperation='source-over';
+}
+
+function clearCanvas(){
+  if(!confirm('Clear all drawings?'))return;
+  penStrokes=[];
+  penCtx.clearRect(0,0,penCanvasEl.width,penCanvasEl.height);
+  DB.set('p6_drawing',null);
+  toast('Canvas cleared 🗑️');
+}
+
+function saveDrawing(){
+  var url=penCanvasEl.toDataURL('image/png');
+  var a=document.createElement('a');
+  a.href=url;a.download='drawing-'+td+'.png';a.click();
+  toast('Drawing saved! 🖼️');
+}
+
+// Bind canvas events
+(function(){
+  var canvas=document.getElementById('penCanvas');
+  canvas.addEventListener('mousedown',penStart);
+  canvas.addEventListener('mousemove',penMove);
+  canvas.addEventListener('mouseup',penEnd);
+  canvas.addEventListener('mouseleave',penEnd);
+  canvas.addEventListener('touchstart',penStart,{passive:false});
+  canvas.addEventListener('touchmove',penMove,{passive:false});
+  canvas.addEventListener('touchend',penEnd);
+})();
+
+window.addEventListener('resize',function(){
+  if(document.getElementById('penOverlay').classList.contains('open')){
+    var imgData=penCanvasEl.toDataURL();
+    penCanvasEl.width=window.innerWidth;
+    penCanvasEl.height=window.innerHeight-document.querySelector('.pen-toolbar').offsetHeight;
+    var img=new Image();img.onload=function(){penCtx.drawImage(img,0,0);};img.src=imgData;
+  }
+});
+
+var fbApp=null,fbAuth=null,fbDb=null,fbUser=null;
+function initFb(){try{fbApp=firebase.initializeApp(FB_CONFIG);fbAuth=firebase.auth();fbDb=firebase.database();fbAuth.onAuthStateChanged(function(u){fbUser=u;if(u){document.getElementById('fbOut').style.display='none';document.getElementById('fbIn').style.display='block';document.getElementById('fbEmail').textContent=u.email||'Signed in';autoSync();}else{document.getElementById('fbOut').style.display='block';document.getElementById('fbIn').style.display='none';}});}catch(e){console.warn('FB:',e);}}
+document.getElementById('fbSIBtn').addEventListener('click',function(){var p=new firebase.auth.GoogleAuthProvider();fbAuth.signInWithPopup(p).then(function(r){fbUser=r.user;document.getElementById('fbOut').style.display='none';document.getElementById('fbIn').style.display='block';document.getElementById('fbEmail').textContent=r.user.email||'Signed in';autoSync();toast('Signed in! 🎉');}).catch(function(e){toast('Failed: '+e.message);});});
+document.getElementById('fbSOBtn').addEventListener('click',function(){if(!confirm('Sign out?'))return;fbAuth.signOut().then(function(){fbUser=null;document.getElementById('fbOut').style.display='block';document.getElementById('fbIn').style.display='none';toast('Signed out');});});
+document.getElementById('fbSyncBtn').addEventListener('click',function(){fbSave();toast('Syncing... ☁️');});
+document.getElementById('fbResBtn').addEventListener('click',function(){restoreFb();});
+function fbSave(){if(!fbUser||!fbDb)return;var ss=document.getElementById('fbSS');if(ss)ss.textContent='Saving...';fbDb.ref('users/'+fbUser.uid+'/data').set({tasks:tasks,habits:habits,goals:goals,journal:journal,reminders:reminders,notodos:notodos,streak:streak,focusGoal:focusGoal,vision:vision,savedAt:Date.now()}).then(function(){if(ss)ss.textContent='Synced ✅';}).catch(function(e){if(ss)ss.textContent='Error';});}
+function fbDeb(){if(!fbUser||!fbDb)return;if(fbST)clearTimeout(fbST);fbST=setTimeout(fbSave,2000);}
+function autoSync(){if(!fbUser||!fbDb)return;var ss=document.getElementById('fbSS');if(ss)ss.textContent='Loading...';fbDb.ref('users/'+fbUser.uid+'/data').get().then(function(snap){if(!snap.exists()){fbSave();return;}var d=snap.val();var ln=(DB.get('p6_lastSave')||0)>(d.savedAt||0);if(ln){fbSave();toast('Synced! ☁️');}else{tasks=d.tasks||tasks;habits=d.habits||habits;goals=d.goals||goals;journal=d.journal||journal;reminders=d.reminders||reminders;notodos=d.notodos||notodos;streak=d.streak||streak;focusGoal=d.focusGoal||'';vision=d.vision||'';saveAll();renderAll();renderGoals();toast('Restored! 🎉');}if(ss)ss.textContent='Synced ✅';}).catch(function(){if(ss)ss.textContent='Error';});}
+function restoreFb(){if(!fbUser){toast('Sign in first!');return;}if(!confirm('Restore from cloud?'))return;fbDb.ref('users/'+fbUser.uid+'/data').get().then(function(snap){if(!snap.exists()){toast('No backup found');return;}var d=snap.val();tasks=d.tasks||[];habits=d.habits||[];goals=d.goals||[];journal=d.journal||[];reminders=d.reminders||[];notodos=d.notodos||[];streak=d.streak||{count:0,last:''};focusGoal=d.focusGoal||'';vision=d.vision||'';saveAll();renderAll();renderGoals();toast('Restored! 🎉');}).catch(function(){toast('Restore failed');});}
+window.addEventListener('online',function(){document.getElementById('offBanner').style.display='none';});
+window.addEventListener('offline',function(){document.getElementById('offBanner').style.display='block';});
+if(!navigator.onLine)document.getElementById('offBanner').style.display='block';
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
+renderAll();renderGoals();schedNotifs();initFb();
+</script>
+</body>
+</html>
